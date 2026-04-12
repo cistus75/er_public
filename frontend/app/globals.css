@@ -29,6 +29,7 @@ body,
   --badge-content-shadow-2:rgba(0,0,0,0.05);
   --badge-title-color: #2d3748;
   --announcement-text:black;
+  --announcement-light-text:rgb(50, 50, 50);
   --route-content-bg:white;
   --route-content-text: #2d3748;
   --tip-text:rgb(75, 75, 75);
@@ -55,6 +56,7 @@ html.dark {
   --badge-content-shadow-2:rgba(255,255,255,0.05);
   --badge-title-color: #ffffff;
   --announcement-text:white;
+  --announcement-light-text:rgb(200, 200, 200);
   --route-content-bg:#1e1e1e;
   --route-content-text:white;
   --tip-text:rgb(190, 190, 190);
