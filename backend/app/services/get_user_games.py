@@ -6,7 +6,7 @@ from statistics import mean
 
 import httpx
 
-from ..common.utils import get_character_role, calculate_stat_grades, calculate_cobalt_stat_grades
+from ..common.utils import get_character_role, calculate_stat_grades, calculate_cobalt_stat_grades, CHARACTER_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -277,6 +277,7 @@ class GameStatsAnalyzer:
             top_3_stats.append(
                 {
                     "characterCode": char_code,
+                    "characterName": CHARACTER_MAP.get(str(char_code), "알 수 없음"),
                     "totalGames": num_games,
                     "winRate": round((wins / num_games) * 100, 1),
                     "top3Rate": round((top3 / num_games) * 100, 1),
@@ -395,6 +396,7 @@ class GameStatsAnalyzer:
                 "avg_camera_add": self._cal_avg_camera_add(matches_to_analyze),
                 "avg_camera_remove": self._cal_avg_camera_remove(matches_to_analyze),
                 "most_used_character_code": most_char,
+                "most_used_character_name": CHARACTER_MAP.get(str(most_char), "알 수 없음") if most_char else "없음",
                 "character_usage_by_code": char_usage,
                 "recent_most_3_characters": recent_top_3_chars,
                 "character_role": character_role,
@@ -466,6 +468,7 @@ class GameStatsAnalyzer:
             "avg_emp_drone": self._cal_avg_emp_drone(matches_to_analyze),
             "average_monster_kills": avg_monster,
             "most_used_character_code": most_char,
+            "most_used_character_name": CHARACTER_MAP.get(str(most_char), "알 수 없음") if most_char else "없음",
             "character_usage_by_code": char_usage,
             "recent_most_3_characters": recent_top_3_chars,
             "avg_vision_score": avg_vision,
