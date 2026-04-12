@@ -113,10 +113,15 @@ async def get_ai_analysis_async(
     try:
         character_role = stat_data.get("character_role", "알 수 없음")
         stat_grades = stat_data.get("stat_grades", {})
+        
+        # AI가 '계정 레벨'을 언급하는 환각을 물리적으로 차단하기 위해 데이터 자체에서 삭제
+        ai_stat_data = stat_data.copy()
+        ai_stat_data.pop("account_level", None)
+        
         system_prompt = base_prompt.format(
             character_role=character_role,
             stat_grades_json=json.dumps(stat_grades, indent=2, ensure_ascii=False),
-            stat_data_json=json.dumps(stat_data, indent=2, ensure_ascii=False),
+            stat_data_json=json.dumps(ai_stat_data, indent=2, ensure_ascii=False),
             comparison_stats_json=json.dumps(comparison_stats or {}, indent=2, ensure_ascii=False),
         )
     except KeyError as e:
