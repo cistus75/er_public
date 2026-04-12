@@ -1,0 +1,64 @@
+.noRecord{
+  background-color: #1e1e1e;
+  padding: 15px;
+  border-radius: 15px;
+  color: white;
+  flex: 1;
+  width: 70vw;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-section {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 100%;
+}
+
+.bottom-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+.bottom-section-left,
+.bottom-section-right {
+  flex: 1;
+  min-width: 350px;
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 15px;
+  color: white;
+  box-sizing: border-box;
+  min-height: 350px;
+}
+
+.bottom-section-left h3,
+.bottom-section-right h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #eee;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+}
+
+/* 데이터 없음 모듈 스타일 */
+.noDataModule {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+    color: #888;
+}
+@media (max-width: 900px) {
+  .table-section {
+    flex-direction: column;
+  }
+}

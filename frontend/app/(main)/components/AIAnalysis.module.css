@@ -1,0 +1,83 @@
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.titleContainer {
+  display: flex;
+  align-items: center; /* 아이콘과 텍스트를 세로 중앙 정렬 */
+  gap: 10px;
+  margin-bottom: 15px;
+  /* ✨ border-bottom과 padding-bottom을 제거하여 선을 없앱니다. */
+}
+
+.titleIcon {
+  border-radius: 50%;
+}
+
+.title {
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #eee;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.content {
+  flex-grow: 1;
+  background-color: #2f2f2f;
+  border-radius: 10px;
+  padding: 15px;
+  line-height: 1.7;
+  font-size: 1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  color: #aaa;
+}
+
+.analysisText {
+  margin: 0;
+  width: 100%;
+  align-self: flex-start;
+}
+
+.iconContainer {
+  position: relative;
+  display: flex; /* Image 태그를 자식으로 가질 때 레이아웃 유지를 위해 추가 */
+}
+
+/* 2. 툴팁 스타일 (평소에는 숨겨져 있음) */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+
+  position: absolute;
+  top: 115%; /* 아이콘 바로 아래에 표시되도록 설정 */
+  left: 50%;
+  transform: translateX(-50%); /* 중앙 정렬 */
+  
+  max-width: 80vw;
+  text-align: center;
+
+  background-color: #222;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  white-space: normal; /* 툴팁 내용이 한 줄로 표시되도록 */
+  z-index: 10;
+}
+
+/* 3. 아이콘 컨테이너에 마우스를 올리면(hover) 툴팁이 보이도록 함 */
+.iconContainer:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}

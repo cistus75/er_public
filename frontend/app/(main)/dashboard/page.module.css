@@ -1,0 +1,236 @@
+/* page.module.css */
+
+/* 전체 페이지 컨테이너 */
+.contents {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.user-info {
+  width: 70vw;
+  flex-grow: 0;
+  flex-shrink: 0;
+  background-color: black;
+  margin-bottom: 20px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  flex-direction: row;
+  gap: 15px;
+  color: white;
+  box-sizing: border-box;
+  min-height: 100px;
+}
+
+.rank-area {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.name-level-area {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.nickname-area {
+  display: flex;
+  align-items: center;
+  padding-bottom: 2px;
+}
+
+.nickname-text {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.score-area,
+.rank-text-area {
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.level-text {
+  font-size: 1em;
+  color: lightgray;
+}
+
+.badge-area {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  padding-left: 20px;
+}
+@media (max-width: 768px) {
+  .badge-area {
+    justify-content: center;
+  }
+}
+
+.badge-item {
+  position: relative; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  margin-top: 8px; 
+  background-color: #333;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: center;
+  min-width: 150px;
+  max-width: 250px;
+  white-space: pre-line;
+  transition: opacity 0.2s;
+}
+
+.badge-item:hover .badge-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* 토글 버튼 스타일 */
+.middle-container {
+  width: 70vw;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: space-between;
+}
+
+.toggle{
+  display: flex;
+  gap: 10px;
+}
+
+.toggle-button {
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid rgb(144, 144, 144);
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.toggle-button.active {
+  background-color: black;
+  color: white;
+  border-color: black;
+}
+
+.toggle-button:not(.active):hover {
+  background-color: #3a3a3a;
+}
+
+.guide{
+  display: flex;
+  align-items: center;
+  color:var(--announcement-text);
+  font-size: 0.8rem;
+  text-align: right;
+  max-width: 50vw;
+}
+
+.detail {
+  width: 70vw;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.table-section {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 100%;
+}
+
+.bottom-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  width: 100%;
+}
+
+.bottom-section-left,
+.bottom-section-right {
+  flex: 1;
+  min-width: 350px;
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 15px;
+  color: white;
+  box-sizing: border-box;
+  min-height: 350px;
+}
+
+.bottom-section-left h3,
+.bottom-section-right h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  font-weight: bold;
+  color: #eee;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+}
+
+/* 데이터 없음 모듈 스타일 */
+.noDataModule {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-align: center;
+    color: #888;
+}
+
+/* 작은 화면 대응 */
+@media (max-width: 1200px) {
+  .user-info,
+  .detail,
+  .toggle-container {
+    width: 90vw;
+  }
+}
+
+@media (max-width: 900px) {
+  .user-info,
+  .table-section {
+    flex-direction: column;
+  }
+  .guide{
+    display: hidden;
+  }
+}
+

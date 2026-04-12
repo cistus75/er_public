@@ -1,0 +1,193 @@
+/* app/components/StatTable.module.css */
+
+/* .panel 스타일 */
+.tableContainer {
+  width: 100%;
+  max-width: 800px;
+  margin: 16px auto;
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* overflow: hidden; 제거 */
+  padding: 0;
+}
+
+/* --- 수정된 .titleContainer --- */
+.titleContainer {
+  padding: 0.8rem 1.5rem 0.8rem 1.5rem;
+  border-bottom: 1px solid #444;
+  background-color: #1e1e1e;
+  border-radius: 8px;
+
+}
+
+/* --- 수정된 .tableTitle --- */
+.tableTitle {
+  /* <h3> 제목을 툴팁의 기준점으로 설정 */
+  position: relative;
+  display: inline-block; /* 텍스트만큼만 영역을 차지하도록 */
+  
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #ddd;
+}
+
+/* --- 툴팁 스타일 --- */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%); 
+  width: 300px; 
+  max-width: 80vw;
+  margin-bottom: 5px;
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.5em;
+  font-weight: normal;
+  white-space: normal;
+  text-align: center;
+  z-index: 10;
+}
+
+/* --- !! 수정된 툴팁 호버 선택자 !! --- */
+/* 툴팁을 h3의 자식으로 변경했으므로, 
+   형제 선택자(~) 대신 자손 선택자(공백)를 사용합니다. */
+.tableTitle:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* --- 나머지 스타일 --- */
+
+.tableWrapper {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+
+.statTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.tr {
+  border-bottom: 1px solid #444;
+}
+.tr:last-child {
+  border-bottom: none;
+}
+
+.td {
+  padding: 5px 0;
+  font-size: 0.9rem;
+  vertical-align: middle;
+  background-color: transparent;
+}
+
+.statLabel {
+  color: #aaa;
+  font-weight: 500;
+  text-align: left;
+}
+
+.statValue {
+  color: #ddd;
+  font-weight: 600;
+  text-align: right;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.statValueSpan {
+  font-size: 1rem;
+}
+
+.comparison {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.positive {
+  color: #1a73e8; /* 긍정 (파란색) */
+}
+
+.negative {
+  color: #d93025; /* 부정 (빨간색) */
+}
+
+.noData {
+  text-align: center;
+  color: #888;
+  padding: 16px;
+}
+
+.toggleButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1.5rem; 
+  background-color: #333;
+  color: #ddd;
+  border: 1px solid #555;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: #444;
+}
+
+.arrow {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease-in-out;
+  display: inline-block;
+  color: #ddd;
+}
+
+.arrowOpen {
+  transform: rotate(180deg);
+}
+
+.detailedStatsPanel {
+  margin-top: 0.5rem; 
+}
+
+.categoryBody {
+  border-top: 1px solid #555;
+}
+
+.detailedStatsPanel > .categoryBody:first-child {
+  border-top: none;
+}
+
+.subheadingTr {
+  border-bottom: none;
+}
+
+.subheadingTr:last-child {
+  border-bottom: none;
+}
+
+.subheading {
+  font-size: 1.1rem; 
+  font-weight: 600;
+  color: #ccc; 
+  text-align: left;
+  padding: 14px 0 10px 0; 
+  border-bottom: 1px solid #444; 
+}

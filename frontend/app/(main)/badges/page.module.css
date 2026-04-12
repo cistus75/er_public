@@ -1,0 +1,10 @@
+.badgePage{
+    background-color: var(--background-color);
+}
+.badgeContent{
+    background-color: var(--badge-content-bg);
+    box-shadow: 0 10px 15px -3px var(--badge-content-shadow-1), 0 4px 6px -2px var(--badge-content-shadow-2);
+}
+.badgeTitle{
+    color : var(--badge-title-color);
+}

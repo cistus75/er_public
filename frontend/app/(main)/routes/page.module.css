@@ -1,0 +1,7 @@
+.infoArea{
+    margin-top: 2rem;
+    width: 70vw;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}

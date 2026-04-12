@@ -1,0 +1,24 @@
+.searchForm{
+    width: 70vw;
+    height: 7vh;
+    display: flex;
+    flex-direction: row;
+}
+.searchInput{
+    flex: 4;
+    height: 100%;
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    font: 2rem;
+    text-align: center;
+    font-weight: bold;
+}
+.searchBtn{
+    flex: 1;
+    flex-shrink: 0;
+    height: 100%;
+    background-color: var(--sub-background-color);
+    color: var(--input-text);
+    font: 2rem;
+    font-weight: bold;
+}
