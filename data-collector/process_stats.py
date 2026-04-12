@@ -12,9 +12,9 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 # 캐릭터 맵 로드 함수
 try:
-    from utils import load_character_map
+    from utils import get_latest_character_map
 except ImportError:
-    def load_character_map():
+    def get_latest_character_map(api_key, db):
         return {} 
 
 # --- 설정 ---
@@ -37,7 +37,8 @@ def main():
         
         print("✅ MongoDB에 성공적으로 연결되었습니다.")
 
-        character_map = load_character_map()
+        api_key = os.getenv("OPEN_API_KEY")
+        character_map = get_latest_character_map(api_key, db['metadata'])
         
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=DATA_RANGE_DAYS)
         print(f"📅 통계 집계 기준일: {cutoff_date} (이후 데이터만 사용)")
@@ -63,7 +64,7 @@ def main():
                 'tier': {
                     '$switch': {
                         'branches': [
-                            {'case': {'$gte': ['$userGames.mmrBefore', 7800]}, 'then': 'demigod'},
+                            {'case': {'$gte': ['$userGames.mmrBefore', 8000]}, 'then': 'demigod'},
                             {'case': {'$gte': ['$userGames.mmrBefore', 7100]}, 'then': 'mithril'},
                             {'case': {'$gte': ['$userGames.mmrBefore', 6400]}, 'then': 'meteorite'},
                             {'case': {'$gte': ['$userGames.mmrBefore', 5000]}, 'then': 'diamond'},

@@ -16,7 +16,8 @@ from slowapi.middleware import SlowAPIMiddleware
 
 # 분리된 모듈들 import
 from .core.setting import get_settings
-from .db.db import connect_to_mongo, close_mongo_connection
+from .db.db import connect_to_mongo, close_mongo_connection, get_database
+from .common.utils import set_dynamic_character_map
 from .routers import user, jobs, route
 from .exceptions.error import (
     UserNotFoundException,
@@ -45,6 +46,17 @@ async def lifespan(app: FastAPI):
     # --- 앱 시작 시 ---
     await connect_to_mongo()
     
+    # DB에서 수집기가 최신화한 동적 캐릭터 맵을 메모리에 캐싱
+    try:
+        db = await get_database()
+        if db is not None:
+            doc = await db['metadata'].find_one({'_id': 'character_map'})
+            if doc and 'map' in doc:
+                set_dynamic_character_map(doc['map'])
+                logger.info("MongoDB에서 최신 동적 캐릭터 맵을 메모리에 캐싱 완료했습니다.")
+    except Exception as e:
+        logger.warning(f"동적 캐릭터 맵 캐싱 실패 (Fallback 사용할 예정): {e}")
+
     # 세분화된 타임아웃 설정
     er_timeout = httpx.Timeout(10.0, connect=30.0)
     app.state.er_client = httpx.AsyncClient(

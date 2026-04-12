@@ -19,7 +19,7 @@ async def get_comparison_stats(
     
     # 티어 통계 쿼리
     if tier != 'unrank':
-        query_tier = tier if tier not in ['titan', 'immortal'] else 'mithril'
+        query_tier = tier if tier not in ['titan', 'immortal'] else 'demigod'
         tasks.append(db.tier_overall_stats.find_one({'tier': query_tier}, {'_id': 0}))
     else:
         tasks.append(asyncio.sleep(0, result=None))

@@ -7,8 +7,7 @@ import asyncio
 import random
 from functools import lru_cache
 
-import google.generativeai as genai
-from google.api_core import exceptions as google_exceptions
+import httpx
 import tenacity
 from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, retry_if_exception_type
 
@@ -47,24 +46,37 @@ def _resolve_prompt_path(prompt_filename: str) -> str:
 # 🔄 [재시도(Retry) 로직]
 # 일시적 오류 및 과부하 시 지수 백오프(Exponential Backoff)로 재시도합니다.
 # =========================================================
+def is_retryable_error(exc):
+    if isinstance(exc, httpx.HTTPStatusError):
+        # 429 (Too Many Requests), 500, 503, 504 오류는 재시도 대상
+        return exc.response.status_code in (429, 500, 503, 504)
+    if isinstance(exc, httpx.RequestError):
+        # 네트워크 및 타임아웃 오류도 재시도
+        return True
+    return False
+
 @retry(
-    retry=retry_if_exception_type(
-        (
-            google_exceptions.ResourceExhausted,
-            google_exceptions.DeadlineExceeded,
-            google_exceptions.ServiceUnavailable,
-        )
-    ),
+    retry=retry_if_exception_type(Exception) & tenacity.retry_if_exception(is_retryable_error),
     wait=wait_exponential(multiplier=1, min=2, max=10),
     stop=stop_after_attempt(3),
     before_sleep=before_sleep_log(logger, logging.INFO),
 )
-async def _generate_with_retry(model, system_prompt: str):
-    """tenacity 재시도 로직이 적용된 Gemini API 호출 함수."""
-    return await model.generate_content_async(
-        system_prompt,
-        request_options={"timeout": 30},
-    )
+async def _generate_with_retry(api_key: str, system_prompt: str):
+    """httpx를 사용한 REST API 직접 호출 함수 (Race condition 방지)"""
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key={api_key}"
+    payload = {
+        "contents": [{"parts": [{"text": system_prompt}]}]
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, json=payload, timeout=30.0)
+        response.raise_for_status()
+        data = response.json()
+        try:
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError) as e:
+            logger.error(f"예상치 못한 응답 포맷: {data}")
+            raise Exception("API 응답 구조 분석 실패") from e
 
 
 # =========================================================
@@ -125,38 +137,38 @@ async def get_ai_analysis_async(
         )
         return "시스템 오류: 프롬프트와 데이터 형식이 맞지 않는다요."
 
-    # 5. API 키 선택 및 호출
-    # [레이스 컨디션 수정]
-    # genai.configure()는 프로세스 전역 상태를 변경합니다.
-    # 세마포어 내부에서 configure → model 생성을 연속 실행하면,
-    # asyncio의 단일 스레드 특성상 두 호출 사이에 문맥 전환이 없어 안전합니다.
+    # 5. API 키 선택 및 HTTP REST 호출 (글로벌 오염 방지)
+    is_angpyeong = 'angpyeong' in prompt_filename
+    
     async with semaphore:
         selected_key = random.choice(API_KEYS)
-        genai.configure(api_key=selected_key)
-        model = genai.GenerativeModel("models/gemma-3-27b-it")
 
         try:
-            response = await _generate_with_retry(model, system_prompt)
+            response_text = await _generate_with_retry(selected_key, system_prompt)
             logger.info(
                 "AI 분석 성공 | prompt=%s | key=...%s",
                 prompt_filename,
                 selected_key[-4:],
             )
-            return response.text
+            return response_text
 
-        except tenacity.RetryError:
-            logger.warning(
-                "AI 분석 재시도 한도 초과 | prompt=%s | key=...%s (할당량 부족 추정)",
-                prompt_filename,
-                selected_key[-4:],
-            )
-            return (
-                "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요! 😵\n"
-                "잠시 후에 다시 시도해주라요. (할당량 초과)"
-            )
-
-        except Exception:
+        except Exception as e:
+            if isinstance(e, tenacity.RetryError):
+                logger.warning(
+                    "AI 분석 재시도 한도 초과 | prompt=%s | key=...%s (할당량 부족 추정)",
+                    prompt_filename,
+                    selected_key[-4:],
+                )
+                if is_angpyeong:
+                    return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라! (서버 과부하)"
+                return (
+                    "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요! 😵\n"
+                    "잠시 후에 다시 시도해주라요. (할당량 초과)"
+                )
+            
             logger.exception(
                 "AI 분석 중 예기치 않은 오류 | prompt=%s", prompt_filename
             )
+            if is_angpyeong:
+                return "흥, 어디선가 불경한 기운이 짐을 방해하는구나... (알 수 없는 오류 발생)"
             return "점을 보는 도중 수정구슬이 깨졌다요... (알 수 없는 오류 발생)"

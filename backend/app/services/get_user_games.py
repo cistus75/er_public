@@ -6,7 +6,7 @@ from statistics import mean
 
 import httpx
 
-from ..common.utils import get_character_role, calculate_stat_grades, calculate_cobalt_stat_grades, CHARACTER_MAP
+from ..common.utils import get_character_role, calculate_stat_grades, calculate_cobalt_stat_grades, get_character_name
 
 logger = logging.getLogger(__name__)
 
@@ -252,7 +252,7 @@ class GameStatsAnalyzer:
         count = Counter(characters)
         return count.most_common(1)[0][0], dict(count)
 
-    def _analyze_recent_top_3_characters(self, matches: list) -> list:
+    def _analyze_recent_top_3_characters(self, matches: list, mode: str = "ranked") -> list:
         if not matches:
             return []
         characters_played = [m.get("characterNum") for m in matches if m.get("characterNum")]
@@ -269,15 +269,19 @@ class GameStatsAnalyzer:
             if num_games == 0:
                 continue
 
-            wins = sum(1 for m in char_matches if m.get("gameRank", 0) == 1)
-            top3 = sum(1 for m in char_matches if 1 <= m.get("gameRank", 0) <= 3)
+            if mode == "cobalt":
+                wins = sum(1 for m in char_matches if m.get("victory", 0) == 1)
+                top3 = wins # 코발트 모드는 4:4 이므로 승리가 곧 Top 3 진입과 동일하게 처리 (혹은 무의미)
+            else:
+                wins = sum(1 for m in char_matches if m.get("gameRank", 0) == 1)
+                top3 = sum(1 for m in char_matches if 1 <= m.get("gameRank", 0) <= 3)
             total_team_kills = sum(m.get("teamKill", 0) for m in char_matches)
             total_damage = sum(m.get("damageToPlayer", 0) for m in char_matches)
 
             top_3_stats.append(
                 {
                     "characterCode": char_code,
-                    "characterName": CHARACTER_MAP.get(str(char_code), "알 수 없음"),
+                    "characterName": get_character_name(char_code),
                     "totalGames": num_games,
                     "winRate": round((wins / num_games) * 100, 1),
                     "top3Rate": round((top3 / num_games) * 100, 1),
@@ -370,7 +374,7 @@ class GameStatsAnalyzer:
 
             kda_stats = self._calculate_kda(matches_to_analyze)
             most_char, char_usage = self._get_most_used_character_and_usage(matches_to_analyze)
-            recent_top_3_chars = self._analyze_recent_top_3_characters(matches_to_analyze)
+            recent_top_3_chars = self._analyze_recent_top_3_characters(matches_to_analyze, mode="cobalt")
             kd_phase = self._cal_phase_kill_death(matches_to_analyze)
             character_role = get_character_role(most_char)
 
@@ -396,7 +400,7 @@ class GameStatsAnalyzer:
                 "avg_camera_add": self._cal_avg_camera_add(matches_to_analyze),
                 "avg_camera_remove": self._cal_avg_camera_remove(matches_to_analyze),
                 "most_used_character_code": most_char,
-                "most_used_character_name": CHARACTER_MAP.get(str(most_char), "알 수 없음") if most_char else "없음",
+                "most_used_character_name": get_character_name(most_char) if most_char else "없음",
                 "character_usage_by_code": char_usage,
                 "recent_most_3_characters": recent_top_3_chars,
                 "character_role": character_role,
@@ -417,7 +421,7 @@ class GameStatsAnalyzer:
 
         kda_stats = self._calculate_kda(matches_to_analyze)
         most_char, char_usage = self._get_most_used_character_and_usage(matches_to_analyze)
-        recent_top_3_chars = self._analyze_recent_top_3_characters(matches_to_analyze)
+        recent_top_3_chars = self._analyze_recent_top_3_characters(matches_to_analyze, mode=mode)
 
         win_rate = self._calculate_win_rate(matches_to_analyze)
         avg_rank = self._calculate_average_rank(matches_to_analyze)
@@ -468,7 +472,7 @@ class GameStatsAnalyzer:
             "avg_emp_drone": self._cal_avg_emp_drone(matches_to_analyze),
             "average_monster_kills": avg_monster,
             "most_used_character_code": most_char,
-            "most_used_character_name": CHARACTER_MAP.get(str(most_char), "알 수 없음") if most_char else "없음",
+            "most_used_character_name": get_character_name(most_char) if most_char else "없음",
             "character_usage_by_code": char_usage,
             "recent_most_3_characters": recent_top_3_chars,
             "avg_vision_score": avg_vision,

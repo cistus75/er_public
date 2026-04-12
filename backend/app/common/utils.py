@@ -92,6 +92,21 @@ CHARACTER_MAP = {
     "87": "코렐라인"
 }
 
+_dynamic_character_map = None
+
+def set_dynamic_character_map(new_map: dict):
+    global _dynamic_character_map
+    _dynamic_character_map = new_map
+
+def get_character_name(code):
+    """
+    동적으로 가져온 맵을 우선 조회하고, 없으면 하드코딩된 CHARACTER_MAP을 Fallback으로 사용합니다.
+    """
+    code_str = str(code)
+    if _dynamic_character_map and code_str in _dynamic_character_map:
+        return _dynamic_character_map[code_str]
+    return CHARACTER_MAP.get(code_str, "알 수 없음")
+
 def load_character_map():
     """
     미리 정의된 CHARACTER_MAP 딕셔너리를 반환합니다.
@@ -280,4 +295,4 @@ def calculate_cobalt_stat_grades(stat: dict, character_role: str) -> dict:
         g["평균 아군 치유량"] = _g_high(stat.get("avg_team_heal", 0), 8000, 6000, 4000, 2000)
 
     best, worst = _best_worst(g)
-    return {"grades": g, "best": best, "worst": worst}
+    return {"grades": g, "best": best, "worst": worst}
