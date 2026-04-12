@@ -2,6 +2,8 @@
 
 import asyncio
 import logging
+import time
+import urllib.parse
 from contextlib import asynccontextmanager
 import httpx
 from fastapi import FastAPI, Request
@@ -25,7 +27,7 @@ from .exceptions.error import (
 )
 
 # --- 로거 설정 ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(name)s (%(filename)s:%(lineno)d) - %(message)s')
 settings = get_settings()
 
 class HealthCheckFilter(logging.Filter):
@@ -69,6 +71,29 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
+
+# --- 병목 추적 및 상세 로깅 미들웨어 ---
+logger = logging.getLogger(__name__)
+
+@app.middleware("http")
+async def log_request_time(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    
+    path = request.url.path
+    if path.startswith("/api/users/"):
+        decoded_path = urllib.parse.unquote(path)
+        status = "성공" if response.status_code == 200 else f"실패({response.status_code})"
+        
+        if "/num/" in decoded_path:
+            nickname = decoded_path.split("/num/")[-1]
+            logger.info(f"[유저 번호조회] 닉네임='{nickname}' | 결과={status} | 총 소요시간={process_time:.2f}초")
+        elif "/stat/" in decoded_path:
+            user_id = decoded_path.split("/stat/")[-1]
+            logger.info(f"[통계+AI 분석] 유저번호='{user_id}' | 결과={status} | 총 소요시간={process_time:.2f}초")
+            
+    return response
 
 # CORS
 app.add_middleware(
