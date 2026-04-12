@@ -38,8 +38,9 @@ export default function DashboardContent() {
 
   const [nameVisible, setNameVisible] = useState(true);
 
-  const FASTAPI_BASE_URL = process.env.NEXT_PUBLIC_FASTAPI_BASE_URL;
-  // const FASTAPI_BASE_URL = 'https://adina-test.onrender.com'; .
+  const rawBaseUrl = process.env.NEXT_PUBLIC_FASTAPI_BASE_URL || '';
+  const FASTAPI_BASE_URL = rawBaseUrl.replace(/\/$/, '');
+  // const FASTAPI_BASE_URL = 'https://er-public.onrender.com';
 
   useEffect(() => {
     if (!nickname) {

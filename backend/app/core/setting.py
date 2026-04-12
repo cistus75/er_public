@@ -27,9 +27,10 @@ class Settings(BaseSettings):
     SEASON_ID: int = 37
     CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
-        'https://er-user-insight-gsn4.vercel.app',
-        'https://adina-crystal-ball.vercel.app',
-        'https://adina-test.vercel.app',
+        "https://er-public.vercel.app",
+        "https://er-user-insight-gsn4.vercel.app",
+        "https://adina-crystal-ball.vercel.app",
+        "https://adina-test.vercel.app",
     ]
 
 # @lru_cache: Settings 객체를 한 번만 생성하고 캐싱하여 성능 향상
