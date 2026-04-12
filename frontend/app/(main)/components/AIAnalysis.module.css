@@ -46,6 +46,7 @@
   margin: 0;
   width: 100%;
   align-self: flex-start;
+  white-space: pre-wrap; /* AI가 생성한 줄바꿈(\n)을 렌더링 */
 }
 
 .iconContainer {

@@ -21,14 +21,16 @@ export default function AIAnalysis({ title, analysis, loading, ver = 'adina' }) 
           {/* 2. 하드코딩된 텍스트 대신 props로 받은 'title'을 사용합니다. */}
           <span className={styles.title}>{title}</span>
           <span className={styles.tooltip}>
-            본 시스템은 매우 불안정하고, 신뢰성이 없는 순전 재미용임를 알립니다. AI의 한계로 인해 잘못된 정보를 제공할 수 있습니다.
+            본 시스템은 매우 불안정하고, 신뢰성이 없는 순전 재미용임을 알립니다. AI의 한계로 인해 잘못된 정보를 제공할 수 있습니다.
           </span>
         </div>
         
       </div>
       <div className={styles.content}>
         {loading ? (
-          <div className={styles.loading}>아디나가 분석 중이다요!</div>
+          <div className={styles.loading}>
+            {ver === 'adina' ? '아디나가 분석 중이다요!' : '비앙카가 분석 중이니라!'}
+          </div>
         ) : (
           <p className={styles.analysisText}>{analysis}</p>
         )}
