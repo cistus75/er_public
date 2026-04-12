@@ -1,4 +1,4 @@
-# app/core/config.py
+# app/core/setting.py
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache

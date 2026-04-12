@@ -2,13 +2,10 @@
 
 import asyncio
 import logging
-from fastapi import Depends
 import httpx
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# ✨ 분리된 다른 서비스 및 모듈들을 import 합니다.
 from. import ai, er
-from..db.db import get_database
 from ..common.utils import get_tier
 from .get_badges import get_badges
 
@@ -85,13 +82,11 @@ async def get_user_profile_data(
             prompt_filename='rank_ai_analysis_prompt.txt',
             stat_data=rank_stat, semaphore=gemini_semaphore,
             comparison_stats=rank_most_char_dia_stats,
-            most_character_number=rank_stat.get('most_used_character_code')
         )
         tasks['angpyeong_ai'] = ai.get_ai_analysis_async(
             prompt_filename='angpyeong_ai_analysis_prompt.txt',
             stat_data=rank_stat, semaphore=gemini_semaphore,
             comparison_stats=rank_most_char_dia_stats,
-            most_character_number=rank_stat.get('most_used_character_code')
         )
 
     if not normal_stat.get('no_record'):
@@ -99,14 +94,12 @@ async def get_user_profile_data(
             prompt_filename='normal_ai_analysis_prompt.txt',
             stat_data=normal_stat, semaphore=gemini_semaphore,
             comparison_stats=normal_most_char_dia_stats,
-            most_character_number=normal_stat.get('most_used_character_code')
         )
 
     if not cobalt_stat.get('no_record'):
         tasks['cobalt_ai'] = ai.get_ai_analysis_async(
             prompt_filename='cobalt_ai_analysis_prompt.txt',
             stat_data=cobalt_stat, semaphore=gemini_semaphore,
-            most_character_number=cobalt_stat.get('most_used_character_code')
         )
 
     # 4. 모든 병렬 작업을 실행하고 결과를 수집합니다.
@@ -129,7 +122,7 @@ async def get_user_profile_data(
         "rank_stat": rank_stat,
         "normal_stat": normal_stat,
         "cobalt_stat": cobalt_stat,
-        "badges": results_dict.get('badges',),
+        "badges": results_dict.get('badges'),
         "rank_ai_analysis": results_dict.get('rank_ai', "분석할 최근 랭크 게임 기록이 없는거다요."),
         "normal_ai_analysis": results_dict.get('normal_ai', "분석할 최근 일반 게임 기록이 없는거다요."),
         "angpyeong_ai_analysis": results_dict.get('angpyeong_ai', "분석할 최근 랭크 게임 기록이 없는거다요."),

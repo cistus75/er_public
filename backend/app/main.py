@@ -1,10 +1,9 @@
 # app/main.py
 
-import asyncio  # ✨ 1. asyncio 모듈 import 추가
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 import httpx
-import google.generativeai as genai
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -53,8 +52,7 @@ async def lifespan(app: FastAPI):
     )
     
 
-    # ✨ 2. Gemini API 동시 요청 제어를 위한 세마포어 생성
-    # 앱 전체에서 공유되며, 동시 요청 수를 5개로 제한합니다.
+    # Gemini API 동시 요청 수를 5개로 제한하는 세마포어
     app.state.gemini_semaphore = asyncio.Semaphore(5)
     
     yield # 애플리케이션 실행
@@ -90,7 +88,7 @@ async def health_check():
     return {"status": "ok"}
 
 @app.api_route("/uptime", methods=["GET", "HEAD"])
-async def health_check():
+async def uptime_check():
     return {"status": "uptime health check"}
 
 
@@ -104,4 +102,3 @@ app.include_router(user.router)
 app.include_router(jobs.router)
 app.include_router(route.router)
 
-# 기본 엔드포인트

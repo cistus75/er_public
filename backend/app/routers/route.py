@@ -5,7 +5,7 @@ import httpx
 # --- 필요한 서비스 및 유틸리티 함수 import ---
 from ..services import er
 from ..common.utils import get_tier
-from .user import get_er_client  # user 라우터의 의존성 주입 함수 재사용
+from ..dependencies import get_er_client  # 공통 의존성 모듈에서 가져옵니다
 
 # 로거 설정
 logger = logging.getLogger(__name__)

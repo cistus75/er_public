@@ -27,9 +27,10 @@ async def connect_to_mongo():
         await db.client.admin.command('ping')
         logger.info(f"MongoDB '{settings.MONGO_DB_NAME}' 데이터베이스에 성공적으로 연결되었습니다.")
     except Exception as e:
-        logger.error(f"MongoDB 연결 실패: {e}")
+        logger.critical("MongoDB 연결 실패 — 앱을 시작할 수 없습니다: %s", e)
         db.client = None
         db.db_instance = None
+        raise  # lifespan 단계에서 조기 실패 유도
 
 async def close_mongo_connection():
     logger.info("MongoDB 연결을 닫습니다.")

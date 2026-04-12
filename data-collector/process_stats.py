@@ -1,7 +1,7 @@
 import os
 import sys
 from pymongo import MongoClient
-from datetime import datetime, timedelta, timezone # [수정] timezone 추가
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
 # 1. 환경 변수 로드
@@ -34,38 +34,36 @@ def main():
         db = client[DB_NAME]
         
         raw_games_collection = db['raw_games']
-        high_mmr_char_stats_collection = db['high_mmr_char_stats']
-        tier_overall_stats_collection = db['tier_overall_stats']
-
+        
         print("✅ MongoDB에 성공적으로 연결되었습니다.")
 
         character_map = load_character_map()
         
-        # [수정 포인트] UTC 타임존을 명시하여 MongoDB 데이터와 포맷 일치시킴
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=DATA_RANGE_DAYS)
         print(f"📅 통계 집계 기준일: {cutoff_date} (이후 데이터만 사용)")
 
-        # [진단용] 실제로 조건에 맞는 데이터가 있는지 먼저 카운트 (디버깅 핵심)
         matched_count = raw_games_collection.count_documents({'userGames.0.startDtm': {'$gte': cutoff_date}})
         print(f"🔍 대상 데이터 수: {matched_count}건")
 
         if matched_count == 0:
-            print("⚠️ 경고: 집계할 최신 데이터가 없습니다. 날짜 형식이 올바른지 확인해주세요.")
+            print("⚠️ 경고: 집계할 최신 데이터가 없습니다. 종료합니다.")
             return
 
-        # [기본 파이프라인]
+        # allowDiskUse 활성화 (대규모 데이터 대비)
+        aggregation_options = {'allowDiskUse': True}
+
         base_pipeline = [
-            # userGames.0.startDtm은 우리가 인덱스를 걸어둔 필드입니다.
             {'$match': {'userGames.0.startDtm': {'$gte': cutoff_date}}},
-            {'$unwind': '$userGames'},
+            {'$unwind': '$userGames'}
         ]
         
-        # [티어 계산 단계]
+        # [티어 계산 단계] utils.py와 맞추어 데미갓(7800+) 추가
         tier_calculation_stage = {
             '$addFields': {
                 'tier': {
                     '$switch': {
                         'branches': [
+                            {'case': {'$gte': ['$userGames.mmrBefore', 7800]}, 'then': 'demigod'},
                             {'case': {'$gte': ['$userGames.mmrBefore', 7100]}, 'then': 'mithril'},
                             {'case': {'$gte': ['$userGames.mmrBefore', 6400]}, 'then': 'meteorite'},
                             {'case': {'$gte': ['$userGames.mmrBefore', 5000]}, 'then': 'diamond'},
@@ -97,12 +95,10 @@ def main():
             'avg_team_heal': {'$avg': '$userGames.teamRecover'},
             'avg_vision_score': {'$avg': '$userGames.viewContribution'},
             
-            # 신규 지표
             'avg_clutch': {'$avg': '$userGames.clutchCount'},
             'avg_terminate': {'$avg': '$userGames.terminateCount'},
             'avg_credit_gain': {'$avg': '$userGames.totalGainVFCredit'},
             
-            # 카메라 & 드론
             'avg_camera_add': {'$avg': '$userGames.addTelephotoCamera'}, 
             'avg_camera_remove': {'$avg': '$userGames.removeTelephotoCamera'},
             'avg_use_cctv': {'$avg': '$userGames.useSecurityConsole'},
@@ -145,7 +141,7 @@ def main():
             'avg_emp_drone': {'$round': ['$avg_emp_drone', 1]}
         }
 
-        # --- 3. [1/2] 상위 MMR 캐릭터별 통계 ---
+        # --- [1/2] 상위 MMR 캐릭터별 통계 ---
         print(f"\n[1/2] {MMR_THRESHOLD_FOR_CHAR_STATS} MMR 이상 캐릭터별 통계 계산 중...")
         
         high_mmr_char_pipeline = base_pipeline + [
@@ -164,7 +160,7 @@ def main():
             }}
         ]
         
-        high_mmr_char_results = list(raw_games_collection.aggregate(high_mmr_char_pipeline))
+        high_mmr_char_results = list(raw_games_collection.aggregate(high_mmr_char_pipeline, **aggregation_options))
         
         if high_mmr_char_results:
             total_games_in_pool = sum(stat['total_games_for_pick_rate'] for stat in high_mmr_char_results)
@@ -175,13 +171,16 @@ def main():
                 stat['pick_rate'] = round(stat['total_games_for_pick_rate'] / total_games_in_pool, 4) if total_games_in_pool > 0 else 0
                 del stat['total_games_for_pick_rate']
 
-            high_mmr_char_stats_collection.delete_many({})
-            high_mmr_char_stats_collection.insert_many(high_mmr_char_results)
-            print(f"✅ 캐릭터별 통계 {len(high_mmr_char_results)}개 저장 완료.")
+            # 원자적 처리(다운타임 제거)를 위해 임시 컬렉션에 등록 후 Swap
+            temp_char_col = db['temp_high_mmr_char_stats']
+            temp_char_col.delete_many({}) # 만약 잔여물 있으면 클리어
+            temp_char_col.insert_many(high_mmr_char_results)
+            temp_char_col.rename('high_mmr_char_stats', dropTarget=True)
+            print(f"✅ 캐릭터별 통계 {len(high_mmr_char_results)}개 무중단 저장 완료.")
         else:
-            print(f"ℹ️ 해당 기간/MMR 구간의 데이터가 없어 캐릭터 통계를 생성하지 않았습니다.")
+            print(f"ℹ️ 캐릭터 통계를 생성할 데이터가 없습니다.")
 
-        # --- 4. [2/2] 티어별 종합 통계 ---
+        # --- [2/2] 티어별 종합 통계 ---
         print("\n[2/2] 티어별 종합 통계 계산 중...")
         
         tier_overall_pipeline = base_pipeline + [
@@ -197,12 +196,15 @@ def main():
             }}
         ]
         
-        tier_overall_results = list(raw_games_collection.aggregate(tier_overall_pipeline))
+        tier_overall_results = list(raw_games_collection.aggregate(tier_overall_pipeline, **aggregation_options))
         
         if tier_overall_results:
-            tier_overall_stats_collection.delete_many({})
-            tier_overall_stats_collection.insert_many(tier_overall_results)
-            print(f"✅ 티어별 종합 통계 {len(tier_overall_results)}개 저장 완료.")
+            # 원자적 처리
+            temp_tier_col = db['temp_tier_overall_stats']
+            temp_tier_col.delete_many({})
+            temp_tier_col.insert_many(tier_overall_results)
+            temp_tier_col.rename('tier_overall_stats', dropTarget=True)
+            print(f"✅ 티어별 종합 통계 {len(tier_overall_results)}개 무중단 저장 완료.")
         else:
             print("ℹ️ 티어별 통계를 생성할 데이터가 없습니다.")
 
