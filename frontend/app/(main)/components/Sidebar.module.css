@@ -1,0 +1,106 @@
+/* app/components/Sidebar.module.css */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  padding: 20px;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+  z-index: 1001;
+  animation: slideIn 0.3s forwards;
+  
+  /* --- ✨ Flexbox에서 Grid로 변경 --- */
+  display: grid;
+  /* ✨ 세 개의 행(row)을 정의: 헤더(auto), 콘텐츠(나머지 전부), 푸터(auto) */
+  grid-template-rows: auto 1fr auto; 
+}
+
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  /* ✨ Grid 환경에서 overflow를 안정적으로 처리하기 위한 설정 */
+  min-height: 0; 
+}
+
+.settingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background-color: var(--sub-background-color);
+}
+
+.themeToggleButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  color: var(--themebtn-text);
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  width: 120px;
+  background-color: var(--themebtn-bg-color);
+}
+
+.themeToggleButton:hover {
+  color: var(--themebtn-hover-text);
+}
+.sidebarFooter {
+  padding-top: 20px;
+}
+.closeButton {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  width: 100%;
+  background-color: var(--themebtn-bg-color);
+  color: var(--themebtn-text);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.closeButton:hover{
+    color:var(--themebtn-hover-text);
+}
+
+.sidebarList li a{
+  text-decoration: none;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 5px;
+  color: var(--text-color);
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+.sidebarList li a:hover{
+  color: var(--text-color-hover);
+  background-color: var(--sub-background-color);
+}

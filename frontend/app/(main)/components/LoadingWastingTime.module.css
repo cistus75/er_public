@@ -1,0 +1,21 @@
+.loadingContent{
+    text-align: center;
+}
+.loadingTitle{
+    font-size: 30px;
+    color: var(--announcement-text);
+    font-weight: bold;
+}
+.loadingText{
+    font-size: 25px;
+    color: var(--announcement-text);
+}
+.bold{
+    font-weight: bold;
+}
+.italic{
+    font-style: italic;
+}
+.underline{
+    text-decoration: underline;
+}

@@ -1,0 +1,42 @@
+.announcementBar {
+  display: flex;
+  align-items: center;
+  width: 70vw;
+  margin: 10px auto 0px; 
+  text-align: center;
+  justify-content: center;
+  height: 5vh;
+  min-height: 40px;
+  border-radius: 10px;
+  background-color: var(--header-bg);
+  color: var(--announcement-text);
+  font-size: 14px;
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.announcementText {
+  margin: 0;
+  white-space: nowrap;
+  padding: 0 16px;
+}
+
+.scrollingText {
+    position: absolute;
+  will-change: transform;
+  /* animation-name은 JS에서 동적으로 설정됩니다. */
+  animation-timing-function: linear;
+}
+
+/* @keyframes 이름을 marquee로 정의합니다. */
+@keyframes marquee {
+  from {
+    /* 컨테이너 오른쪽 바깥에서 시작합니다. */
+    transform: translateX(100% + 16px);
+  }
+  to {
+    /* 텍스트 자신의 너비만큼 왼쪽으로 이동하여 완전히 사라지게 합니다. */
+    transform: translateX(calc(-100% - 32px)); /* 32px는 좌우 패딩 합 */
+  }
+}
