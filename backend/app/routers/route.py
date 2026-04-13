@@ -34,13 +34,16 @@ async def get_route_details_api(
 
     # 필요한 루트 정보가 담긴 객체를 안전하게 추출합니다.
     route_info = route_data.get('recommendWeaponRoute', {})
-    userId = route_info.get('userId') # 제작자 티어 조회를 위해 userNum을 가져옵니다.
+    userNickname = route_info.get('userNickname') # 제작자 티어 조회를 위해 닉네임을 가져옵니다.
 
     # --- 2. 제작자 랭크 정보 API 호출 및 티어 계산 ---
     creator_tier = "Unranked" # API 호출 실패 등을 대비한 기본값 설정
-    if userId:
-        # er.py의 get_user_rank_async 함수를 호출합니다.
-        creator_rank_data = await er.get_user_rank_async(er_client, userId)
+    if userNickname:
+        # 먼저 닉네임으로 UID(userId)를 조회합니다.
+        userId = await er.get_user_id_by_nickname_async(er_client, userNickname)
+        if userId:
+            # er.py의 get_user_rank_async 함수를 호출합니다.
+            creator_rank_data = await er.get_user_rank_async(er_client, userId)
         if creator_rank_data:
             mmr = creator_rank_data.get('mmr', -1)
             rank = creator_rank_data.get('rank', -1)
