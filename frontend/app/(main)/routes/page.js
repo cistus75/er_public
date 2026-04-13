@@ -28,8 +28,11 @@ export default function RouteSearchPage() {
     setMvpData(null);
     setFullApiData(null); // 이전 결과 초기화
 
+    const rawBaseUrl = process.env.NEXT_PUBLIC_FASTAPI_BASE_URL || '';
+    const FASTAPI_BASE_URL = rawBaseUrl.replace(/\/$/, '');
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_FASTAPI_BASE_URL}/api/routes/${routeId}`);
+      const res = await fetch(`${FASTAPI_BASE_URL}/api/routes/${routeId}`);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.detail || `'${routeId}'번 루트를 찾을 수 없습니다.`);
