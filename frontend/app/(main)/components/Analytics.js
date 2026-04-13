@@ -10,7 +10,6 @@ export default function Analytics() {
   if (!gaId) {
     return null;
   }
-//123
   return (
     <>
       <Script

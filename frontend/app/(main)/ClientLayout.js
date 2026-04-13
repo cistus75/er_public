@@ -1,30 +1,31 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from 'react';
+/**
+ * ClientLayout.js
+ * 프레젠테이션 계층 — 전체 레이아웃(헤더/푸터/사이드바)을 담당하는 클라이언트 컴포넌트.
+ *
+ * 변경사항:
+ *  - useTheme 훅 적용 (테마 상태/로직 분리)
+ *  - 모달 Tailwind CDN 클래스 → ClientLayout.module.css로 교체
+ *  - 디버그 주석 제거
+ */
+
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link'; // ✨ Link 컴포넌트 추가
-import Sidebar from './components/Sidebar'; // ✨ Sidebar 컴포넌트 임포트느려허접커커커위위위커커커
+import Link from 'next/link';
+import { useTheme } from '@/hooks/useTheme';
+import Sidebar from './components/Sidebar';
 import AnnouncementBar from './components/AnnouncementBar';
+import modalStyles from './ClientLayout.module.css';
 
 export default function ClientLayout({ children }) {
   const [nickname, setNickname] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const router = useRouter();
-  const [theme, setTheme] = useState(undefined);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-  }, []);
-
-  useEffect(() => {
-    if (theme) {
-      document.documentElement.className = theme;
-      localStorage.setItem('theme', theme);
-    }
-  }, [theme]);
+  const { theme, toggleTheme } = useTheme();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -35,35 +36,32 @@ export default function ClientLayout({ children }) {
     }
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
-  // ✨ 사이드바를 열고 닫는 함수
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
+  // theme이 undefined이면 localStorage를 아직 읽기 전 → 렌더링 스킵 (하이드레이션 mismatch 방지)
   if (theme === undefined) {
     return null;
   }
-  
+
   return (
     <div>
       <div className="layout-wrapper">
         <header style={{ paddingLeft: '5px', paddingRight: '20px' }}>
-          <div className='left' style={{ marginTop: '20px' }}>
-            <Link href="/"> {/* ✨ Link 컴포넌트로 Image를 감싸고 href를 메인 페이지('/')로 설정 */}
+          <div className="left" style={{ marginTop: '20px' }}>
+            <Link href="/">
               <Image
-                src="/miro_logo.png" // ✨ public 폴더의 파일을 직접 가리키도록 수정
+                src="/miro_logo.png"
                 alt="miro logo"
                 width={50}
                 height={50}
                 className="logo"
-                style={{ objectFit: "contain" }}
+                style={{ objectFit: 'contain' }}
                 unoptimized={true}
               />
             </Link>
           </div>
-          <div className='center'>
+          <div className="center">
             <form onSubmit={handleSubmit} className="search-form-small">
               <input
                 type="text"
@@ -75,50 +73,58 @@ export default function ClientLayout({ children }) {
               />
             </form>
           </div>
-          <div className='right'>
+          <div className="right">
             <button onClick={openSidebar} className="darkmode-button">
               <Image
                 src={theme === 'dark' ? '/menu_white.png' : '/menu_black.png'}
-                alt="dark mode"
+                alt="메뉴 열기"
                 width={40}
                 height={40}
-                style={{ objectFit: "contain" }}
+                style={{ objectFit: 'contain' }}
                 unoptimized={true}
               />
             </button>
           </div>
         </header>
-        <div className='announcement-area'>
-          <AnnouncementBar/>
+
+        <div className="announcement-area">
+          <AnnouncementBar />
         </div>
 
-        <main className="content">
-          {children}
-        </main>
+        <main className="content">{children}</main>
 
         <footer>
           <div className="copyright">
-            이 사이트는 이터널 리턴의 API를 활용해 제작되었으며,&nbsp; 
-            <a href="https://support.playeternalreturn.com/hc/ko/articles/49090866623257-API" target="_blank" rel="noopener noreferrer">
+            이 사이트는 이터널 리턴의 API를 활용해 제작되었으며,&nbsp;
+            <a
+              href="https://support.playeternalreturn.com/hc/ko/articles/49090866623257-API"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               API 이용 약관
             </a>
-            을 준수하고 있습니다.  상세한 정보는&nbsp;
-            <a href="https://support.playeternalreturn.com/hc/ko/articles/49090866623257-API" target="_blank" rel="noopener noreferrer">
-                공식 개발자 페이지
+            을 준수하고 있습니다. 상세한 정보는&nbsp;
+            <a
+              href="https://support.playeternalreturn.com/hc/ko/articles/49090866623257-API"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              공식 개발자 페이지
             </a>
             에서 확인하실 수 있습니다.
           </div>
         </footer>
       </div>
 
+      {/* 닉네임 미입력 시 에러 모달 — CSS 모듈로 스타일링 (Tailwind CDN 의존성 제거) */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl dark:bg-gray-800 text-center">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">입력 오류</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">분석할 닉네임을 입력해주세요.</p>
+        <div className={modalStyles.modalOverlay}>
+          <div className={modalStyles.modalBox}>
+            <h3 className={modalStyles.modalTitle}>입력 오류</h3>
+            <p className={modalStyles.modalText}>분석할 닉네임을 입력해주세요.</p>
             <button
               onClick={() => setShowModal(false)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+              className={modalStyles.modalButton}
             >
               닫기
             </button>
@@ -126,14 +132,12 @@ export default function ClientLayout({ children }) {
         </div>
       )}
 
-      {/* ✨ Sidebar 컴포넌트 렌더링 및 props 전달 */}
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={closeSidebar}
         currentTheme={theme}
         toggleTheme={toggleTheme}
       />
-      
     </div>
   );
 }

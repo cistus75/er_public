@@ -83,7 +83,7 @@ export default function CobaltPage({cobaltStat, ai, loading }) {
                     ) : (
                         <div className={styles.noDataModule}>
                             <p>최근 플레이한 캐릭터 정보가 없습니다.</p>
-                            <p>일반 게임을 플레이하면 정보가 표시됩니다.</p>
+                            <p>코발트 게임을 플레이하면 정보가 표시됩니다.</p>
                         </div>
                     )}
                 </div>

@@ -30,10 +30,6 @@ function getDisplayValue(value, fallback = 'N/A') {
 }
 
 export default function RouteSummary({ data }) {
-  // 컴포넌트가 렌더링될 때 받은 데이터의 실제 모양을 콘솔에 출력합니다.
-  // 개발자 도구(F12) 콘솔에서 이 로그를 확인하여 데이터 구조를 파악하세요.
-  console.log("RouteSummary가 받은 데이터:", data);
-    
   if (!data) return null;
 
   const tierImageSrc = rankImgs[data.creatorTier?.toLowerCase()] || rankImgs["unrank"];
