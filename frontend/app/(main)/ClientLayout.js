@@ -15,8 +15,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from '@/hooks/useTheme';
-import Sidebar from './components/Sidebar';
-import AnnouncementBar from './components/AnnouncementBar';
+import Sidebar from './components/shared/Sidebar';
+import AnnouncementBar from './components/shared/AnnouncementBar';
 import modalStyles from './ClientLayout.module.css';
 
 export default function ClientLayout({ children }) {

@@ -3,10 +3,10 @@
 import styles from "./pageComp.module.css";
 
 import { useState, useCallback } from 'react';
-import StatTable from "../components/StatTable";
-import PhaseTable from "../components/PhaseTable";
-import AIAnalysis from "../components/AIAnalysis";
-import MostPlayed from "../components/MostPlayed";
+import StatTable from "../components/dashboard/StatTable";
+import PhaseTable from "../components/dashboard/PhaseTable";
+import AIAnalysis from "../components/dashboard/AIAnalysis";
+import MostPlayed from "../components/dashboard/MostPlayed";
 
 export default function CobaltPage({cobaltStat, ai, loading }) {
     if(!cobaltStat){

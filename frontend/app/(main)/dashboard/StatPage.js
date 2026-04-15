@@ -27,9 +27,9 @@
 import { useState, useCallback } from 'react';
 import styles from './pageComp.module.css';
 
-import StatTable from '../components/StatTable';
-import AIAnalysis from '../components/AIAnalysis';
-import MostPlayed from '../components/MostPlayed';
+import StatTable from '../components/dashboard/StatTable';
+import AIAnalysis from '../components/dashboard/AIAnalysis';
+import MostPlayed from '../components/dashboard/MostPlayed';
 import { getCharacterInfo } from '@/lib/characterData';
 import {
   mapStatToViewModel,

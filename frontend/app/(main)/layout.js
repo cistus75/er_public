@@ -1,7 +1,7 @@
 // frontend/app/(main)/layout.js
 
 import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
-import Analytics from './components/Analytics';
+import Analytics from './components/shared/Analytics';
 import localFont from 'next/font/local';
 import ClientLayout from './ClientLayout';
 import '../globals.css';

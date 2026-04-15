@@ -9,7 +9,7 @@ import { useUserStat } from '@/hooks/useUserStat';
 
 import StatPage from './StatPage';
 import CobaltPage from './CobaltPage';
-import LoadingWastingTime from '../components/LoadingWastingTime';
+import LoadingWastingTime from '../components/shared/LoadingWastingTime';
 
 // ── 탭별 설정 상수 ─────────────────────────────────────────
 // 문자열 리터럴을 렌더링 로직에서 분리합니다.
