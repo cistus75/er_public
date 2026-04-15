@@ -5,6 +5,7 @@ import { getPatchNoteData } from '@/lib/patchNotes';
 
 // 2. 새로 만든 클라이언트 컴포넌트를 임포트합니다.
 import MarkdownRenderer from '../../components/patchnotes/MarkdownRenderer';
+import styles from '../page.module.css';
 
 // ... generateMetadata 함수 (변경 없음) ...
 export async function generateMetadata({ params }) {
@@ -18,13 +19,13 @@ export default function PatchNoteDetailPage({ params }) {
   const noteData = getPatchNoteData(params.version);
 
   return (
-    <article style={{ padding: '2rem', maxWidth: '800px', margin: 'auto' }}>
+    <article style={{ padding: '2rem', width: '70vw', margin: 'auto' }}>
       <header style={{ borderBottom: '1px solid #ddd', marginBottom: '2rem' }}>
         <h1>{noteData.title}</h1>
         <p style={{ color: '#666' }}>{noteData.date}</p>
       </header>
       
-      <div>
+      <div className={styles.patchArea}>
         {/* 3. ReactMarkdown 대신 MarkdownRenderer를 사용합니다. */}
         <MarkdownRenderer content={noteData.content} />
       </div>

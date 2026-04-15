@@ -1,5 +1,6 @@
 .patchnoteContainer{
     padding: 2rem;
+    width: 70vw;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -27,4 +28,16 @@
 
 .patchnoteItem a div small{
     color: #666;
+}
+
+.patchArea{
+    width: 70vw;
+}
+
+.patchArea li{
+    margin: 10px 0;
+}
+.patchArea img{
+    max-width: 100px;
+    display: block;
 }

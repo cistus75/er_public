@@ -17,7 +17,6 @@ const Sidebar = ({ isOpen, onClose, currentTheme, toggleTheme }) => {
         <h2 style={{all:'revert'}}>메뉴다요!</h2>
         {/* 여기에 다른 메뉴들을 추가할 수 있습니다. */}
         <ul className={styles.sidebarList}>
-          <li><Link href="/routes">루트 검색</Link></li>
           <li><Link href='/patchnotes'>패치노트</Link></li>
           <li><Link href='/badges'>뱃지 일람</Link></li>
           <li><Link href='https://forms.gle/E5YcNN7ZAwQJMVhh7'>문의/제보</Link></li>
