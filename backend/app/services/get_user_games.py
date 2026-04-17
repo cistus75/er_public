@@ -80,7 +80,7 @@ class GameStatsAnalyzer:
         found_modes: set = set()
         start_time = time.time()
 
-        for page in range(7):
+        for page in range(3):
             # 모든 모드 목표 달성 시 조기 종료
             if (
                 len(ranked_games) >= max_games_per_mode
