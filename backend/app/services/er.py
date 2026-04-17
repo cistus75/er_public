@@ -50,12 +50,12 @@ async def get_user_games_all_modes_async(client: httpx.AsyncClient, userId: str)
         rank_stat = analyzer.get_detailed_stats('ranked')
         normal_stat = analyzer.get_detailed_stats('normal')
         cobalt_stat = analyzer.get_detailed_stats('cobalt')
-        return rank_stat, normal_stat, cobalt_stat
+        return rank_stat, normal_stat, cobalt_stat, analyzer.retry_count
     except Exception as e:
         logger.error(f"유저 게임 통계 분석 중 오류 발생 (userId: {userId}): {e}")
-        # 실패 시 모든 모드에 대해 'no_record'를 반환하여 오류를 전파합니다.
+        # 실패 시 모든 모드에 대해 'no_record'를 반환하고 재시도 횟수는 0으로 설정합니다.
         no_record_stat = {"no_record": True}
-        return no_record_stat, no_record_stat, no_record_stat
+        return no_record_stat, no_record_stat, no_record_stat, 0
     
 
 async def get_route_async(client: httpx.AsyncClient, route_id: int):

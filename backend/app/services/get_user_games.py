@@ -19,6 +19,7 @@ class GameStatsAnalyzer:
         self.userId = userId
         self.client = client
         self.season_id = season_id
+        self.retry_count = 0  # 429 등 재시도 횟수 추적
 
     async def get_user_games_page(self, next_param=None):
         """사용자의 특정 페이지 게임 목록을 비동기로 가져옵니다."""
@@ -33,6 +34,7 @@ class GameStatsAnalyzer:
                 return response.json()
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
+                    self.retry_count += 1 # 재시도 카운트 증가
                     wait_time = (2 ** i) * 0.5
                     logger.warning(
                         "API 호출 제한(429) 발생. %.2f초 후 재시도 (시도 %d/%d) | userId=%s",

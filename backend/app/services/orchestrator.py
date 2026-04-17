@@ -58,7 +58,7 @@ async def get_user_profile_data(
 
     # 1. ER API에서 랭크 정보와 게임 통계를 병렬로 수집합니다.
     er_start = time.perf_counter()
-    rank_result, (rank_stat, normal_stat, cobalt_stat) = await asyncio.gather(
+    rank_result, (rank_stat, normal_stat, cobalt_stat, retry_count) = await asyncio.gather(
         er.get_user_rank_async(er_client, userId),
         er.get_user_games_all_modes_async(er_client, userId),
     )
@@ -71,6 +71,7 @@ async def get_user_profile_data(
     mmr = rank_result.get('mmr', -1) if rank_result else -1
     rank = rank_result.get('rank', -1) if rank_result else -1
     tier = get_tier(mmr, rank)
+    nickname = rank_result.get('nickname') if rank_result else rank_stat.get('nickname', '알 수 없음')
 
     # 2. DB에서 비교 통계 데이터를 비동기 병렬로 수집합니다.
     db_start = time.perf_counter()
@@ -115,19 +116,31 @@ async def get_user_profile_data(
     results_dict = dict(zip(tasks.keys(), task_results))
     ai_duration = time.perf_counter() - ai_start
 
-    # 5. 실패한 작업이 있는지 확인하고 로깅합니다.
-    for key, value in results_dict.items():
-        if isinstance(value, Exception):
-            logger.error(f"병렬 작업 '{key}' 실패: {value}", exc_info=value)
-            results_dict[key] = f"작업 '{key}' 처리 중 오류 발생"
+    # 5. 실패한 작업 확인 및 AI 상태 요약 생성
+    ai_status = []
+    for key, label in [('rank_ai', 'R'), ('normal_ai', 'N'), ('cobalt_ai', 'C'), ('angpyeong_ai', 'A')]:
+        value = results_dict.get(key)
+        if value is None:
+            ai_status.append(f"{label}:-")
+        elif isinstance(value, Exception):
+            logger.error(f"AI 분석 실패 [{key}]: {value}")
+            results_dict[key] = f"분석 실패 ({key})"
+            ai_status.append(f"{label}:ERR")
+        else:
+            ai_status.append(f"{label}:OK")
+
+    # 수집 판수 및 모스트 정보 요약
+    def get_count(s): return s.get('total_games_analyzed', 0) if not s.get('no_record') else 0
+    m_counts = f"R:{get_count(rank_stat)} N:{get_count(normal_stat)} C:{get_count(cobalt_stat)}"
+    most_char = rank_stat.get('most_used_character_name', '없음')
 
     total_duration = time.perf_counter() - total_start
+    
+    # 🎯 최종 요약 로그 한 줄 출력
     logger.info(
-        f"✅ [Performance Trace Sum] Total: {total_duration:.2f}s | "
-        f"API: {er_duration:.2f}s | "
-        f"DB: {db_duration:.2f}s | "
-        f"AI: {ai_duration:.2f}s | "
-        f"userId: {userId}"
+        f"📊 [Search Summary] Nick: {nickname} ({tier.upper()}/{most_char}) | Matches: ({m_counts}) | "
+        f"Total: {total_duration:.2f}s (API:{er_duration:.2f}s | AI:{ai_duration:.2f}s) | "
+        f"Retry: {retry_count}회 | AI Status: [{' '.join(ai_status)}]"
     )
 
     # 6. 모든 데이터를 취합하여 최종 응답 객체를 구성합니다.
