@@ -53,13 +53,16 @@ async def get_user_profile_data(
     """
     여러 서비스를 조율하여 최종 유저 프로필 데이터를 생성하는 핵심 함수.
     """
-    logger.info(f"유저 프로필 데이터 생성 시작 (userId: {userId})")
+    import time
+    total_start = time.perf_counter()
 
     # 1. ER API에서 랭크 정보와 게임 통계를 병렬로 수집합니다.
+    er_start = time.perf_counter()
     rank_result, (rank_stat, normal_stat, cobalt_stat) = await asyncio.gather(
         er.get_user_rank_async(er_client, userId),
         er.get_user_games_all_modes_async(er_client, userId),
     )
+    er_duration = time.perf_counter() - er_start
 
     # 분석할 게임 기록이 전혀 없는 경우, None을 반환하여 라우터에서 404 처리를 하도록 합니다.
     if rank_stat.get('no_record') and normal_stat.get('no_record'):
@@ -70,9 +73,11 @@ async def get_user_profile_data(
     tier = get_tier(mmr, rank)
 
     # 2. DB에서 비교 통계 데이터를 비동기 병렬로 수집합니다.
+    db_start = time.perf_counter()
     tier_stats_result, rank_most_char_dia_stats, normal_most_char_dia_stats = await get_comparison_stats(
         db, tier, rank_stat, normal_stat
     )
+    db_duration = time.perf_counter() - db_start
 
     # 3. AI 분석 및 뱃지 생성을 병렬로 처리할 작업을 구성합니다.
     tasks = {}
@@ -105,8 +110,10 @@ async def get_user_profile_data(
 
     # 4. 모든 병렬 작업을 실행하고 결과를 수집합니다.
     # return_exceptions=True를 통해 일부 작업이 실패해도 전체가 중단되지 않습니다.
+    ai_start = time.perf_counter()
     task_results = await asyncio.gather(*tasks.values(), return_exceptions=True)
     results_dict = dict(zip(tasks.keys(), task_results))
+    ai_duration = time.perf_counter() - ai_start
 
     # 5. 실패한 작업이 있는지 확인하고 로깅합니다.
     for key, value in results_dict.items():
@@ -114,7 +121,14 @@ async def get_user_profile_data(
             logger.error(f"병렬 작업 '{key}' 실패: {value}", exc_info=value)
             results_dict[key] = f"작업 '{key}' 처리 중 오류 발생"
 
-    logger.info(f"유저 프로필 데이터 생성 완료 (userId: {userId})")
+    total_duration = time.perf_counter() - total_start
+    logger.info(
+        f"✅ [Performance Trace Sum] Total: {total_duration:.2f}s | "
+        f"API: {er_duration:.2f}s | "
+        f"DB: {db_duration:.2f}s | "
+        f"AI: {ai_duration:.2f}s | "
+        f"userId: {userId}"
+    )
 
     # 6. 모든 데이터를 취합하여 최종 응답 객체를 구성합니다.
     return {
