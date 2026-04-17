@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css";
 import clsx from 'clsx';
-// 뱃지 데이터를 페이지 상단에 정의합니다.키위새는 멸종했다아마도아마도아마도
+
 const badgeData = [
     { "group": "레벨 뱃지", "name": "신입 연구원", "tier": 1, "condition": "레벨 1 달성" },
     { "group": "레벨 뱃지", "name": "견습 연구원", "tier": 1, "condition": "레벨 30 달성" },
@@ -84,35 +84,53 @@ export default function BadgesPage() {
         return acc;
     }, {});
 
-    // 티어별 배경색을 정의합니다.
-    const tierColor = {
-        1: 'bg-orange-200 text-orange-800',                     // Bronze (밝은 오렌지 브라운)
-        2: 'bg-slate-200 text-slate-800',                       // Silver (연한 회색-푸른 톤)
-        3: 'bg-amber-200 text-amber-800',         // Gold (밝은 황금색)
-        4: 'bg-gradient-to-br from-white to-slate-200 text-gray-800 border border-gray-300 shadow-lg shadow-cyan-500/40'      // Platinum (거의 흰색 + 테두리)
-    }
+    const tierClassMap = {
+        1: styles.tier1,
+        2: styles.tier2,
+        3: styles.tier3,
+        4: styles.tier4
+    };
+
+    const tierNameMap = {
+        1: "Tier 1: Bronze",
+        2: "Tier 2: Silver",
+        3: "Tier 3: Gold",
+        4: "Tier 4: Master"
+    };
 
     return (
         <main className={styles.badgesPage}>
-            <div className={clsx(styles.badgeContent, "max-w-4xl mx-auto rounded-xl shadow-lg p-8")}>
-                <h1 className={clsx(styles.badgeTitle, "text-3xl font-bold mb-6 text-center")}>뱃지 조건</h1>
-                <div className="space-y-6">
-                    {/* 그룹화된 뱃지 데이터를 순회하며 JSX로 렌더링합니다. */}
+            <div className={styles.badgeContent}>
+                <header className={styles.badgeTitle}>
+                    <h1>뱃지 도감</h1>
+                    <p style={{ color: 'var(--tip-text)', marginTop: '8px' }}>
+                        루미아 섬의 진정한 생존자임을 증명하는 명예의 훈장들입니다.
+                    </p>
+                </header>
+
+                <div className={styles.groupList}>
                     {Object.entries(groupedBadges).map(([group, badges]) => (
-                        <div key={group} className="mb-8">
-                            <h2 className={clsx(styles.badgeTitle, "text-2xl font-bold mb-4 border-b-2 border-gray-300 pb-2")}>
+                        <section key={group} className={styles.groupContainer}>
+                            <h2 className={styles.groupName}>
                                 {group}
                             </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className={styles.badgeGrid}>
                                 {badges.map((badge, index) => (
-                                    <div key={index} className={`flex flex-col p-4 rounded-lg shadow-md ${tierColor[badge.tier]}`}>
-                                        <div className="text-lg font-bold text-gray-900">{badge.name}</div>
-                                        <div className="text-sm text-gray-700 mt-1">티어 {badge.tier}</div>
-                                        <div className="text-sm text-gray-600 mt-2">조건: {badge.condition}</div>
+                                    <div 
+                                        key={index} 
+                                        className={clsx(styles.badgeCard, tierClassMap[badge.tier])}
+                                    >
+                                        <div className={styles.badgeName}>{badge.name}</div>
+                                        <div className={styles.badgeTier}>
+                                            {tierNameMap[badge.tier]}
+                                        </div>
+                                        <div className={styles.badgeCondition}>
+                                            {badge.condition}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </section>
                     ))}
                 </div>
             </div>

@@ -1,10 +1,176 @@
-.badgePage{
-    background-color: var(--background-color);
+.badgesPage {
+  width: 100%;
+  min-height: 100%;
+  padding: 40px 20px;
+  background-color: var(--background-color);
+  transition: background-color 0.3s ease;
 }
-.badgeContent{
-    background-color: var(--badge-content-bg);
-    box-shadow: 0 10px 15px -3px var(--badge-content-shadow-1), 0 4px 6px -2px var(--badge-content-shadow-2);
+
+.badgeContent {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: var(--badge-content-bg);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 
+    0 10px 25px -5px var(--badge-content-shadow-1), 
+    0 8px 10px -6px var(--badge-content-shadow-2);
+  transition: all 0.3s ease;
 }
-.badgeTitle{
-    color : var(--badge-title-color);
+
+.badgeTitle {
+  color: var(--badge-title-color);
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.badgeTitle h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, var(--badge-title-color), var(--link-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.groupContainer {
+  margin-bottom: 50px;
+}
+
+.groupName {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--badge-title-color);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--sub-background-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 3-column Grid for desktops, 1-column for mobile */
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Base Badge Card */
+.badgeCard {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background-color: var(--background-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.badgeCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.2);
+}
+
+.badgeName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.badgeTier {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  width: fit-content;
+  margin-bottom: 12px;
+}
+
+.badgeCondition {
+  font-size: 0.95rem;
+  color: var(--tip-text);
+  line-height: 1.5;
+}
+
+/* Tier Specific Colors */
+.tier1 {
+  background-color: #fffaf0; /* Light Orange/Bronze */
+  border-color: #fbd38d;
+}
+.tier1 .badgeName { color: #7b341e; }
+.tier1 .badgeTier { background-color: #feebc8; color: #7b341e; }
+
+.tier2 {
+  background-color: #f7fafc; /* Silver */
+  border-color: #cbd5e0;
+}
+.tier2 .badgeName { color: #2d3748; }
+.tier2 .badgeTier { background-color: #edf2f7; color: #2d3748; }
+
+.tier3 {
+  background-color: #fffdf2; /* Gold */
+  border-color: #f6e05e;
+}
+.tier3 .badgeName { color: #744210; }
+.tier3 .badgeTier { background-color: #fefcbf; color: #744210; }
+
+/* Tier 4 (Diamond/Master) special styling */
+.tier4 {
+  background-color: white;
+  border-color: #90cdf4;
+  box-shadow: 0 0 15px rgba(66, 153, 225, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+.tier4::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, #63b3ed, #b794f4, #f687b3);
+}
+.tier4 .badgeName { 
+  background: linear-gradient(135deg, #2b6cb0, #805ad5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tier4 .badgeTier { background-color: #ebf8ff; color: #2b6cb0; }
+
+/* Dark mode overrides */
+:global(html.dark) .badgeCard {
+  background-color: #2d3748;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+}
+
+:global(html.dark) .tier1 { background-color: #432b21; border-color: #7b341e; }
+:global(html.dark) .tier1 .badgeName { color: #feebc8; }
+:global(html.dark) .tier1 .badgeTier { background-color: #7b341e; color: #feebc8; }
+
+:global(html.dark) .tier2 { background-color: #2a333d; border-color: #4a5568; }
+:global(html.dark) .tier2 .badgeName { color: #edf2f7; }
+:global(html.dark) .tier2 .badgeTier { background-color: #4a5568; color: #edf2f7; }
+
+:global(html.dark) .tier3 { background-color: #3e3214; border-color: #744210; }
+:global(html.dark) .tier3 .badgeName { color: #fefcbf; }
+:global(html.dark) .tier3 .badgeTier { background-color: #744210; color: #fefcbf; }
+
+:global(html.dark) .tier4 { background-color: #1a202c; border-color: #2b6cb0; }
+:global(html.dark) .tier4 .badgeName { 
+  background: linear-gradient(135deg, #63b3ed, #b794f4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .badgeContent {
+    padding: 20px;
+    border-radius: 0;
+  }
+  .badgeGrid {
+    grid-template-columns: 1fr;
+  }
 }
