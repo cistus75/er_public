@@ -1,8 +1,8 @@
 // app/maintenance/layout.js
 
 export const metadata = {
-  title: "점검 중 - 시스템 재구축",
-  robots: "noindex, nofollow", // 검색엔진 수집 차단
+  title: "아디나의 수정구슬 | 미로",
+  //robots: "noindex, nofollow", // 검색엔진 수집 차단
 };
 
 export default function MaintenanceLayout({ children }) {

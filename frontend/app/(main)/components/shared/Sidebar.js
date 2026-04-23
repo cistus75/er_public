@@ -19,6 +19,7 @@ const Sidebar = ({ isOpen, onClose, currentTheme, toggleTheme }) => {
         <ul className={styles.sidebarList}>
           <li><Link href='/patchnotes'>패치노트</Link></li>
           <li><Link href='/badges'>뱃지 일람</Link></li>
+          <li><Link href='https://eternity-tracker.vercel.app/'>이터니티 점수컷</Link></li>
           <li><Link href='https://forms.gle/E5YcNN7ZAwQJMVhh7'>문의/제보</Link></li>
         </ul>
         {/* 다크모드 토글 기능 */}
