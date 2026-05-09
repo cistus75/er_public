@@ -63,7 +63,7 @@ def is_retryable_error(exc):
 )
 async def _generate_with_retry(api_key: str, system_prompt: str):
     """httpx를 사용한 REST API 직접 호출 함수 (Race condition 방지)"""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemma-3-27b-it:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": system_prompt}]}]
     }
@@ -107,7 +107,7 @@ async def get_ai_analysis_async(
 
     # 2. API 키 검증
     if not API_KEYS:
-        return "AI API 키가 설정되지 않아 점을 볼 수 없다요. (서버 설정 오류)"
+        return "AI API 키가 설정되지 않아 점을 볼 수 없다요. 관리자에게 문의해라요!"
 
     # 3. 프롬프트 파일 로드 (캐시 우선)
     try:
@@ -162,13 +162,13 @@ async def get_ai_analysis_async(
                 if is_angpyeong:
                     return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라!"
                 return (
-                    "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요!\n"
-                    "잠시 후에 다시 시도해주는거다요!"
+                    "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요! \n"
+                    "잠시 후에 다시 시도해주라요. "
                 )
             
             logger.exception(
                 "AI 분석 중 예기치 않은 오류 | prompt=%s", prompt_filename
             )
             if is_angpyeong:
-                return "흥, 어디선가 불경한 기운이 짐을 방해하는구나... "
-            return "점을 보는 도중 수정구슬이 깨졌다요..."
+                return "흥, 어디선가 불경한 기운이 짐을 방해하는구나... 잠시 후에 다시 오거라!"
+            return "점을 보는 도중 수정구슬이 깨졌다요... 잠시 후에 다시 시도해보라요!"
