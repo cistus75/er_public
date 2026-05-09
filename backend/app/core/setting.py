@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     
     # App Settings
     APP_NAME: str = "ER User Insight"
-    SEASON_ID: int = 37
+    SEASON_ID: int = 39
     CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "https://er-public.vercel.app",

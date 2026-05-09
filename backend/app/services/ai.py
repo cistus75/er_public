@@ -160,15 +160,15 @@ async def get_ai_analysis_async(
                     selected_key[-4:],
                 )
                 if is_angpyeong:
-                    return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라! (서버 과부하)"
+                    return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라!"
                 return (
-                    "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요! 😵\n"
-                    "잠시 후에 다시 시도해주라요. (할당량 초과)"
+                    "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요!\n"
+                    "잠시 후에 다시 시도해주는거다요!"
                 )
             
             logger.exception(
                 "AI 분석 중 예기치 않은 오류 | prompt=%s", prompt_filename
             )
             if is_angpyeong:
-                return "흥, 어디선가 불경한 기운이 짐을 방해하는구나... (알 수 없는 오류 발생)"
-            return "점을 보는 도중 수정구슬이 깨졌다요... (알 수 없는 오류 발생)"
+                return "흥, 어디선가 불경한 기운이 짐을 방해하는구나... "
+            return "점을 보는 도중 수정구슬이 깨졌다요..."

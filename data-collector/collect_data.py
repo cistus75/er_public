@@ -28,7 +28,7 @@ DB_NAME = "er-user-insight"
 COLLECTION_NAME = "raw_games" 
 
 # 필터링 조건
-TARGET_SEASON_ID = 37        
+TARGET_SEASON_ID = 39        
 TARGET_TEAM_MODE = 3         
 TARGET_MATCHING_MODE = 3     
 TARGET_SERVER_NAME = "Asia"  
