@@ -48,25 +48,21 @@ def _resolve_prompt_path(prompt_filename: str) -> str:
 # =========================================================
 def is_retryable_error(exc):
     if isinstance(exc, httpx.HTTPStatusError):
-        # 400 (Bad Request - 키 문제일 수 있음), 429, 500, 503, 504 오류는 재시도 대상
-        return exc.response.status_code in (400, 429, 500, 503, 504)
+        # 429 (Too Many Requests), 500, 503, 504 오류는 재시도 대상
+        return exc.response.status_code in (429, 500, 503, 504)
     if isinstance(exc, httpx.RequestError):
         # 네트워크 및 타임아웃 오류도 재시도
         return True
     return False
 
 @retry(
-    retry=retry_if_exception_type(Exception), # 모든 에러 발생 시 재시도 (다른 키 선택을 위해)
+    retry=retry_if_exception_type(Exception) & tenacity.retry_if_exception(is_retryable_error),
     wait=wait_exponential(multiplier=1, min=1, max=2),
-    stop=stop_after_attempt(10), # 키가 10개이므로 10번까지 시도하여 살아있는 키를 찾음
+    stop=stop_after_attempt(2),
     before_sleep=before_sleep_log(logger, logging.INFO),
 )
-async def _generate_with_retry(system_prompt: str):
-    """httpx를 사용한 REST API 직접 호출 함수 (호출 시마다 무작위 키 선택)"""
-    if not API_KEYS:
-        raise Exception("사용 가능한 GOOGLE_API_KEYS가 없습니다.")
-        
-    api_key = random.choice(API_KEYS)
+async def _generate_with_retry(api_key: str, system_prompt: str):
+    """httpx를 사용한 REST API 직접 호출 함수 (Race condition 방지)"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": system_prompt}]}]
@@ -74,6 +70,8 @@ async def _generate_with_retry(system_prompt: str):
     
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, timeout=10.0)
+        if response.status_code != 200:
+            logger.error(f"AI 분석 실패 상세 (Status {response.status_code}): {response.text}")
         response.raise_for_status()
         data = response.json()
         try:
@@ -145,16 +143,23 @@ async def get_ai_analysis_async(
     is_angpyeong = 'angpyeong' in prompt_filename
     
     async with semaphore:
+        selected_key = random.choice(API_KEYS)
+
         try:
-            response_text = await _generate_with_retry(system_prompt)
-            logger.info("AI 분석 성공 | prompt=%s", prompt_filename)
+            response_text = await _generate_with_retry(selected_key, system_prompt)
+            logger.info(
+                "AI 분석 성공 | prompt=%s | key=...%s",
+                prompt_filename,
+                selected_key[-4:],
+            )
             return response_text
 
         except Exception as e:
             if isinstance(e, tenacity.RetryError):
                 logger.warning(
-                    "AI 분석 재시도 한도 초과 | prompt=%s (할당량 부족 혹은 키 문제 추정)",
+                    "AI 분석 재시도 한도 초과 | prompt=%s | key=...%s (할당량 부족 추정)",
                     prompt_filename,
+                    selected_key[-4:],
                 )
                 if is_angpyeong:
                     return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라!"
