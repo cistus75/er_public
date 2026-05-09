@@ -120,11 +120,10 @@ def get_tier(mmr, rank=None):
     """
     if mmr is None: return 'unranked'
 
-    if mmr >= 7800:
+    if mmr >= 7600:
         if rank is not None and rank <= 300: return 'immortal'
         if rank is not None and rank <= 1000: return 'titan'
-        return 'mithril' # 7800 이상이지만 랭크 정보가 없거나 1000위 밖
-    elif mmr >= 7400: return 'mithril' # mmr 7400 ~ 7799 구간
+        return 'mithril'
     elif mmr >= 6400: return 'meteorite'
     elif mmr >= 5000: return 'diamond'
     elif mmr >= 3600: return 'platinum'
