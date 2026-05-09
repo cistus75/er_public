@@ -57,19 +57,19 @@ def is_retryable_error(exc):
 
 @retry(
     retry=retry_if_exception_type(Exception) & tenacity.retry_if_exception(is_retryable_error),
-    wait=wait_exponential(multiplier=1, min=2, max=10),
-    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=1, max=2),
+    stop=stop_after_attempt(2),
     before_sleep=before_sleep_log(logger, logging.INFO),
 )
 async def _generate_with_retry(api_key: str, system_prompt: str):
     """httpx를 사용한 REST API 직접 호출 함수 (Race condition 방지)"""
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": system_prompt}]}]
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, json=payload, timeout=30.0)
+        response = await client.post(url, json=payload, timeout=10.0)
         response.raise_for_status()
         data = response.json()
         try:
