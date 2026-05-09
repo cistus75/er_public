@@ -145,23 +145,16 @@ async def get_ai_analysis_async(
     is_angpyeong = 'angpyeong' in prompt_filename
     
     async with semaphore:
-        selected_key = random.choice(API_KEYS)
-
         try:
-            response_text = await _generate_with_retry(selected_key, system_prompt)
-            logger.info(
-                "AI 분석 성공 | prompt=%s | key=...%s",
-                prompt_filename,
-                selected_key[-4:],
-            )
+            response_text = await _generate_with_retry(system_prompt)
+            logger.info("AI 분석 성공 | prompt=%s", prompt_filename)
             return response_text
 
         except Exception as e:
             if isinstance(e, tenacity.RetryError):
                 logger.warning(
-                    "AI 분석 재시도 한도 초과 | prompt=%s | key=...%s (할당량 부족 추정)",
+                    "AI 분석 재시도 한도 초과 | prompt=%s (할당량 부족 혹은 키 문제 추정)",
                     prompt_filename,
-                    selected_key[-4:],
                 )
                 if is_angpyeong:
                     return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라!"
