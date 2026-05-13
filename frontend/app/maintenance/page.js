@@ -25,14 +25,15 @@ export default function MaintenancePage() {
         
         <div style={styles.messageBox}>
           <p style={styles.text}>
-            백엔드 구조를 일부 수정하는 중입니다. 
+            API 이슈로 서비스를 일시적으로 중단합니다.
           </p>
           <p style={styles.subText}>
-            (기존 백엔드 구조 일부 수정 중)
+            (LLM api 작업 중...)
           </p>
           <p style={styles.footerText}>
-            빠르게 작업을 마치고 다시 돌아오겠습니다!<br />
-            조금만 기다려주세요.
+            솔직히 언제 될진 모르겠습니다. 쌀먹의 한계라서요.<br />
+            광고 없이 서비스를 제공하려니 문제가 좀 생기네요.<br />
+            가능한 빠르게 작업을 마치고 다시 돌아오겠습니다.
           </p>
         </div>
       </div>
