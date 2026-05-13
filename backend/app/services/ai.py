@@ -4,12 +4,10 @@ import os
 import json
 import logging
 import asyncio
-import random
+import itertools
 from functools import lru_cache
 
 import httpx
-import tenacity
-from tenacity import retry, stop_after_attempt, wait_exponential, before_sleep_log, retry_if_exception_type
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +20,18 @@ API_KEYS = [k.strip() for k in API_KEYS_STR.split(",") if k.strip()]
 
 if not API_KEYS:
     logger.warning("GOOGLE_API_KEYS 환경 변수가 설정되지 않았습니다. AI 분석 기능을 사용할 수 없습니다.")
+
+# =========================================================
+# 🎯 [라운드 로빈 키 분배기]
+# 동시 요청이 들어와도 각 요청이 서로 다른 프로젝트 키를 자동으로 배정받아
+# 특정 프로젝트에 호출이 몰리는 현상을 방지합니다.
+# itertools.count는 원자적(atomic)이므로 asyncio 환경에서 안전합니다.
+# =========================================================
+_key_counter = itertools.count()
+
+def _get_next_key_index() -> int:
+    """라운드 로빈 방식으로 다음 키 인덱스를 반환합니다."""
+    return next(_key_counter) % len(API_KEYS)
 
 
 # =========================================================
@@ -43,31 +53,15 @@ def _resolve_prompt_path(prompt_filename: str) -> str:
 
 
 # =========================================================
-# 🔄 [재시도(Retry) 로직]
-# 일시적 오류 및 과부하 시 지수 백오프(Exponential Backoff)로 재시도합니다.
+# 🔄 [REST API 호출 함수]
 # =========================================================
-def is_retryable_error(exc):
-    if isinstance(exc, httpx.HTTPStatusError):
-        # 429 (Too Many Requests), 500, 503, 504 오류는 재시도 대상
-        return exc.response.status_code in (429, 500, 503, 504)
-    if isinstance(exc, httpx.RequestError):
-        # 네트워크 및 타임아웃 오류도 재시도
-        return True
-    return False
-
-@retry(
-    retry=retry_if_exception_type(Exception) & tenacity.retry_if_exception(is_retryable_error),
-    wait=wait_exponential(multiplier=1, min=1, max=2),
-    stop=stop_after_attempt(2),
-    before_sleep=before_sleep_log(logger, logging.INFO),
-)
-async def _generate_with_retry(api_key: str, system_prompt: str):
-    """httpx를 사용한 REST API 직접 호출 함수 (Race condition 방지)"""
+async def _call_gemini_api(api_key: str, system_prompt: str) -> str:
+    """httpx를 사용한 REST API 직접 호출 함수"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": system_prompt}]}]
     }
-    
+
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=payload, timeout=10.0)
         if response.status_code != 200:
@@ -139,38 +133,66 @@ async def get_ai_analysis_async(
         )
         return "시스템 오류: 프롬프트와 데이터 형식이 맞지 않는다요."
 
-    # 5. API 키 선택 및 HTTP REST 호출 (글로벌 오염 방지)
+    # 5. 라운드 로빈 키 선택 + 실패 시 전체 키 순차 폴백
     is_angpyeong = 'angpyeong' in prompt_filename
-    
+
     async with semaphore:
-        selected_key = random.choice(API_KEYS)
+        # 라운드 로빈으로 시작 키를 결정하여 프로젝트별 부하를 균등 분배합니다.
+        start_idx = _get_next_key_index()
+        num_keys = len(API_KEYS)
+        last_exception = None
 
-        try:
-            response_text = await _generate_with_retry(selected_key, system_prompt)
-            logger.info(
-                "AI 분석 성공 | prompt=%s | key=...%s",
-                prompt_filename,
-                selected_key[-4:],
-            )
-            return response_text
+        for i in range(num_keys):
+            key_idx = (start_idx + i) % num_keys
+            selected_key = API_KEYS[key_idx]
 
-        except Exception as e:
-            if isinstance(e, tenacity.RetryError):
-                logger.warning(
-                    "AI 분석 재시도 한도 초과 | prompt=%s | key=...%s (할당량 부족 추정)",
+            try:
+                response_text = await _call_gemini_api(selected_key, system_prompt)
+                logger.info(
+                    "AI 분석 성공 | prompt=%s | key=...%s (시도 %d/%d)",
                     prompt_filename,
                     selected_key[-4:],
+                    i + 1,
+                    num_keys,
                 )
-                if is_angpyeong:
-                    return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라!"
-                return (
-                    "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요! \n"
-                    "잠시 후에 다시 시도해주라요. "
+                return response_text
+
+            except httpx.HTTPStatusError as e:
+                last_exception = e
+                status = e.response.status_code
+                logger.warning(
+                    "AI 분석 API 오류 (Status %d) | prompt=%s | key=...%s | 다음 키로 전환합니다. (%d/%d)",
+                    status, prompt_filename, selected_key[-4:], i + 1, num_keys,
                 )
-            
-            logger.exception(
-                "AI 분석 중 예기치 않은 오류 | prompt=%s", prompt_filename
-            )
-            if is_angpyeong:
-                return "흥, 어디선가 불경한 기운이 짐을 방해하는구나... 잠시 후에 다시 오거라!"
-            return "점을 보는 도중 수정구슬이 깨졌다요... 잠시 후에 다시 시도해보라요!"
+                # 429/503은 다른 프로젝트 키로 바꾸면 성공 가능성이 높으므로 짧은 유예 후 전환
+                if status in (429, 503):
+                    await asyncio.sleep(0.3)
+                continue
+
+            except httpx.RequestError as e:
+                last_exception = e
+                logger.warning(
+                    "AI 분석 네트워크/타임아웃 오류 | prompt=%s | key=...%s | 다음 키로 전환합니다. (%d/%d)",
+                    prompt_filename, selected_key[-4:], i + 1, num_keys,
+                )
+                continue
+
+            except Exception as e:
+                last_exception = e
+                logger.warning(
+                    "AI 분석 중 예기치 못한 오류 | prompt=%s | key=...%s | 다음 키로 전환합니다. (%d/%d)",
+                    prompt_filename, selected_key[-4:], i + 1, num_keys,
+                )
+                continue
+
+        # 모든 키를 시도했음에도 성공하지 못한 경우
+        logger.warning(
+            "AI 분석 전체 키 소진 | prompt=%s | 총 %d개 키 시도 실패 (최종 오류: %s)",
+            prompt_filename, num_keys, str(last_exception),
+        )
+        if is_angpyeong:
+            return "짐의 권속들이 너무 많아 피곤하구나! 조금 이따가 오거라!"
+        return (
+            "지금 접속자가 너무 많아 아디나의 신력이 바닥났다요! \n"
+            "잠시 후에 다시 시도해주라요. "
+        )
