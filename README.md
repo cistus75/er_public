@@ -10,7 +10,7 @@
 
 <br>
 
-## Tech Stack
+## 기술 스택
 
 **Frontend**
 ![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=flat-square&logo=nextdotjs&logoColor=white)
@@ -31,6 +31,44 @@
 ![Render](https://img.shields.io/badge/Render-46E3B7?style=flat-square&logo=render&logoColor=black)
 
 <br>
+
+## 시스템 아키텍처
+
+```mermaid
+graph LR
+    User([User]) -->|Search / View| Frontend
+    
+    subgraph Vercel [Frontend Layer]
+        Frontend(Next.js 14<br/>React 18)
+    end
+    
+    subgraph Render [Backend Layer]
+        Backend(FastAPI<br/>Python 3)
+    end
+    
+    subgraph Data & AI
+        DB[(MongoDB)]
+        Gemini{Google Gemini}
+        ER_API{{Game Open API}}
+    end
+    
+    Frontend <-->|REST API| Backend
+    Backend <-->|Fetch Recent Matches| ER_API
+    Backend <-->|Read / Write Data| DB
+    Backend <-->|Generate Feedback| Gemini
+    
+    classDef frontend fill:#000,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef backend fill:#009688,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef db fill:#47A248,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef ai fill:#8E75B2,stroke:#fff,stroke-width:2px,color:#fff;
+    
+    class Frontend frontend;
+    class Backend backend;
+    class DB db;
+    class Gemini ai;
+```
+
+
 
 ## 프로젝트 배경
 
