@@ -60,7 +60,7 @@
 | 상세 지표 | 사이드바 | 뱃지 도감 | 패치노트 |
 |------|------|------|------|
 | <img width="300" src="https://github.com/user-attachments/assets/495c0a49-8a80-4db3-a475-006181009ae6" /> | <img width="300" src="https://github.com/user-attachments/assets/4cbc87c0-ba28-4209-bc40-489ecd7ed62c" /> | <img width="300" src="https://github.com/user-attachments/assets/da7ed5a5-fab5-4584-9d88-224fd9453544" /> | <img width="300" src="https://github.com/user-attachments/assets/85557840-7216-4f6d-8a08-34df652f41cd" /> |
-| 상세 지표 비교 | 추가 메뉴 | 뱃지 획득 조건 | 게임 업데이트 내역 |
+| 상세 지표 비교 | 추가 메뉴 | 뱃지 획득 조건 | 업데이트 내역 |
 
 
 <br>
