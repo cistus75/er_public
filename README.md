@@ -1,16 +1,16 @@
-# 🗡️ 아디나의 수정구슬
+# 아디나의 수정구슬
 ### 이터널 리턴 최근 전적 분석 서비스
 
 > 최근 전적 기반의 실시간 지표 분석과 AI 개인화 피드백을 제공하는 웹 서비스
 
-> ⚠️ 본 레포는 테스트 서버 및 포트폴리오용으로 정리된 버전입니다.
+>  본 레포는 테스트 서버 및 포트폴리오용으로 정리된 버전입니다.
 
-**개발 기간** : 2025.05 ~ 2026.05.17
+**개발 기간** : 2025.05 ~ 2026.05.17 <br>
 **운영 기간** : 2025.08.29 ~ 2026.05.17
 
 <br>
 
-## 💻 Tech Stack
+## Tech Stack
 
 **Frontend**
 ![Next.js](https://img.shields.io/badge/Next.js_14-000000?style=flat-square&logo=nextdotjs&logoColor=white)
@@ -32,7 +32,7 @@
 
 <br>
 
-## 📌 프로젝트 배경
+## 프로젝트 배경
 
 기존의 주류 전적 검색 사이트는 **시즌 전체 통합 전적**을 기준으로 지표를 제공합니다.
 이로 인해 시즌이 변경된 이후 하위 티어에서 플레이한 기록이 함께 집계되어, 현재 실력과 맞지 않는 부정확한 지표가 노출되는 문제가 있습니다.
@@ -41,7 +41,7 @@
 
 <br>
 
-## ✨ 주요 기능
+## 주요 기능
 
 - **전적 검색** : 닉네임 기반의 최근 전적 조회
 - **지표 시각화** : KDA, 승률, 픽률 등 주요 지표를 차트로 시각화
@@ -50,31 +50,31 @@
 
 <br>
 
-## 📸 스크린샷
+## 사이트 스크린샷
 
 | 메인 | 로딩 | 분석 |
 |------|------|------|
-| ![메인]  <img width="2552" height="1262" alt="메인 창" src="https://github.com/user-attachments/assets/0f356864-4495-40f5-a379-930492f9b6f1" />
-| ![로딩]  <img width="2558" height="1263" alt="로딩 창" src="https://github.com/user-attachments/assets/c40ea309-ff5c-43ba-85de-edd1b43d319f" />
-| ![분석]  <img width="2552" height="1260" alt="분석 창" src="https://github.com/user-attachments/assets/c29604bc-53fc-4010-9b28-d1e5fff0dfd4" />
+<img width="2552" height="1262" alt="메인 창" src="https://github.com/user-attachments/assets/0f356864-4495-40f5-a379-930492f9b6f1" />
+<img width="2558" height="1263" alt="로딩 창" src="https://github.com/user-attachments/assets/c40ea309-ff5c-43ba-85de-edd1b43d319f" />
+<img width="2552" height="1260" alt="분석 창" src="https://github.com/user-attachments/assets/c29604bc-53fc-4010-9b28-d1e5fff0dfd4" />
 
 
 
 | 상세 지표 | 사이드바 | 뱃지 도감 | 패치노트 |
 |------|------|------|------|
-| ![상세]  <img width="1795" height="1232" alt="상세 지표" src="https://github.com/user-attachments/assets/495c0a49-8a80-4db3-a475-006181009ae6" />
-| ![사이드바]  <img width="306" height="1260" alt="사이드바" src="https://github.com/user-attachments/assets/9ef10854-2c88-42db-95b6-886919865f2d" />
-| ![뱃지]  <img width="1223" height="1017" alt="뱃지 조건" src="https://github.com/user-attachments/assets/da7ed5a5-fab5-4584-9d88-224fd9453544" />
-| ![패치노트]  <img width="326" height="1217" alt="패치노트" src="https://github.com/user-attachments/assets/a4ffe708-1bf0-4aba-b022-bd52da86ecf6" />
+<img width="1795" height="1232" alt="상세 지표" src="https://github.com/user-attachments/assets/495c0a49-8a80-4db3-a475-006181009ae6" />
+<img width="306" height="1260" alt="사이드바" src="https://github.com/user-attachments/assets/9ef10854-2c88-42db-95b6-886919865f2d" />
+<img width="1223" height="1017" alt="뱃지 조건" src="https://github.com/user-attachments/assets/da7ed5a5-fab5-4584-9d88-224fd9453544" />
+<img width="326" height="1217" alt="패치노트" src="https://github.com/user-attachments/assets/a4ffe708-1bf0-4aba-b022-bd52da86ecf6" />
 
 
 <br>
 
-## 📊 서비스 현황
+## 서비스 현황
 
 > 서비스 종료 기준 누적 활성 유저 **2.6만 명** (2025.05 ~ 2026.05)
 
-![유저수] <img width="2035" height="341" alt="유저수" src="https://github.com/user-attachments/assets/6d01d135-bcb6-4b76-ae0a-c341fcac765d" />
+<img width="2035" height="341" alt="유저수" src="https://github.com/user-attachments/assets/6d01d135-bcb6-4b76-ae0a-c341fcac765d" />
 
 <br>
 
