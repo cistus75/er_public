@@ -52,20 +52,15 @@
 
 ## 사이트 스크린샷
 
-| 메인 | 로딩 | 분석 |
+| 메인 | 로딩 | 분석 결과 |
 |------|------|------|
-<img width="2552" height="1262" alt="메인 창" src="https://github.com/user-attachments/assets/0f356864-4495-40f5-a379-930492f9b6f1" />
-<img width="2558" height="1263" alt="로딩 창" src="https://github.com/user-attachments/assets/c40ea309-ff5c-43ba-85de-edd1b43d319f" />
-<img width="2552" height="1260" alt="분석 창" src="https://github.com/user-attachments/assets/c29604bc-53fc-4010-9b28-d1e5fff0dfd4" />
-
-
+| <img width="400" src="https://github.com/user-attachments/assets/0f356864-4495-40f5-a379-930492f9b6f1" /> | <img width="400" src="https://github.com/user-attachments/assets/c40ea309-ff5c-43ba-85de-edd1b43d319f" /> | <img width="400" src="https://github.com/user-attachments/assets/c29604bc-53fc-4010-9b28-d1e5fff0dfd4" /> |
+| 닉네임 검색 페이지 | 데이터 로딩 화면 | 전적 분석 결과 페이지 |
 
 | 상세 지표 | 사이드바 | 뱃지 도감 | 패치노트 |
 |------|------|------|------|
-<img width="1795" height="1232" alt="상세 지표" src="https://github.com/user-attachments/assets/495c0a49-8a80-4db3-a475-006181009ae6" />
-<img width="306" height="1260" alt="사이드바" src="https://github.com/user-attachments/assets/9ef10854-2c88-42db-95b6-886919865f2d" />
-<img width="1223" height="1017" alt="뱃지 조건" src="https://github.com/user-attachments/assets/da7ed5a5-fab5-4584-9d88-224fd9453544" />
-<img width="326" height="1217" alt="패치노트" src="https://github.com/user-attachments/assets/a4ffe708-1bf0-4aba-b022-bd52da86ecf6" />
+| <img width="300" src="https://github.com/user-attachments/assets/495c0a49-8a80-4db3-a475-006181009ae6" /> | <img width="300" src="https://github.com/user-attachments/assets/9ef10854-2c88-42db-95b6-886919865f2d" /> | <img width="300" src="https://github.com/user-attachments/assets/da7ed5a5-fab5-4584-9d88-224fd9453544" /> | <img width="300" src="https://github.com/user-attachments/assets/a4ffe708-1bf0-4aba-b022-bd52da86ecf6" /> |
+| 상세 지표 비교 | 추가 메뉴 | 뱃지 획득 조건 | 게임 업데이트 내역 |
 
 
 <br>
