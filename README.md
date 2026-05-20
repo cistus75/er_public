@@ -48,8 +48,8 @@ graph LR
     
     subgraph Data & AI
         DB[(MongoDB)]
-        Gemini{Google Gemini}
-        ER_API{{Game Open API}}
+        Gemini{Google Gemini API}
+        ER_API{{Eternal Return API API}}
     end
     
     Frontend <-->|REST API| Backend
