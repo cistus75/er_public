@@ -49,7 +49,7 @@ graph LR
     subgraph Data & AI
         DB[(MongoDB)]
         Gemini{Google Gemini API}
-        ER_API{{Eternal Return API API}}
+        ER_API{{Eternal Return API}}
     end
     
     Frontend <-->|REST API| Backend
