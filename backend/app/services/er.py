@@ -1,15 +1,15 @@
 import logging
+
 import httpx
 
 # 게임 통계 집계 로직은 별도 분석기에 두고 API 서비스에서는 호출만 담당합니다.
 from .get_user_games import GameStatsAnalyzer
-from..core.setting import get_settings
+from ..core.setting import get_settings
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
 async def get_user_id_by_nickname_async(client: httpx.AsyncClient, nickname: str):
-    """닉네임을 통해 사용자의 내부 UID(userId)를 가져옵니다."""
     url = f"/v1/user/nickname?query={nickname}"
     try:
         response = await client.get(url)
@@ -22,8 +22,7 @@ async def get_user_id_by_nickname_async(client: httpx.AsyncClient, nickname: str
         logger.error(f"UID 조회 실패 (nickname: {nickname}): {e}")
         return None
 
-async def get_user_rank_async(client: httpx.AsyncClient, userId: str)  :
-    """지정된 유저의 랭크 정보를 비동기적으로 가져옵니다."""
+async def get_user_rank_async(client: httpx.AsyncClient, userId: str):
     url = f"/v1/rank/uid/{userId}/{settings.SEASON_ID}/3"
     try:
         response = await client.get(url)
@@ -38,9 +37,6 @@ async def get_user_rank_async(client: httpx.AsyncClient, userId: str)  :
         return None
 
 async def get_user_games_all_modes_async(client: httpx.AsyncClient, userId: str):
-    """
-    GameStatsAnalyzer를 사용하여 유저의 랭크/일반/코발트 게임 통계를 모두 가져옵니다.
-    """
     try:
         analyzer = GameStatsAnalyzer(userId, client, settings.SEASON_ID)
         await analyzer.collect_match_data(20)
@@ -56,7 +52,6 @@ async def get_user_games_all_modes_async(client: httpx.AsyncClient, userId: str)
     
 
 async def get_route_async(client: httpx.AsyncClient, route_id: int):
-    """지정된 루트 ID의 상세 정보를 비동기적으로 가져옵니다."""
     url = f"/v1/weaponRoutes/recommend/{route_id}"
     try:
         response = await client.get(url)

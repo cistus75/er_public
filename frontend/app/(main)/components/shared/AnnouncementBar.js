@@ -20,7 +20,7 @@ const AnnouncementBar = () => {
     );
   }, [announcements.length]);
 
-  // 텍스트 길이에 따른 스크롤 여부 체크
+  // 공지가 표시 영역보다 길 때만 스크롤 애니메이션을 적용합니다.
   useEffect(() => {
     if (announcementRef.current && announcements.length > 0) {
       const element = announcementRef.current;

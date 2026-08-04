@@ -1,5 +1,3 @@
-import os
-
 # API에서 캐릭터 맵을 가져오지 못할 때 사용할 기본 맵입니다.
 
 CHARACTER_MAP = {
@@ -94,43 +92,50 @@ CHARACTER_MAP = {
 
 _dynamic_character_map = None
 
+
 def set_dynamic_character_map(new_map: dict):
     global _dynamic_character_map
     _dynamic_character_map = new_map
 
+
 def get_character_name(code):
-    """
-    동적으로 가져온 맵을 우선 조회하고, 없으면 하드코딩된 CHARACTER_MAP을 Fallback으로 사용합니다.
-    """
     code_str = str(code)
     if _dynamic_character_map and code_str in _dynamic_character_map:
         return _dynamic_character_map[code_str]
     return CHARACTER_MAP.get(code_str, "알 수 없음")
 
+
 def load_character_map():
-    """
-    미리 정의된 CHARACTER_MAP 딕셔너리를 반환합니다.
-    """
     return CHARACTER_MAP
 
+
 def get_tier(mmr, rank=None):
-    """
-    MMR과 Rank를 기반으로 정확한 티어를 반환합니다.
-    """
-    if mmr is None: return 'unranked'
+    if mmr is None:
+        return 'unranked'
 
     if mmr >= 7600:
-        if rank is not None and rank <= 300: return 'immortal'
-        if rank is not None and rank <= 1000: return 'titan'
+        if rank is not None and rank <= 300:
+            return 'immortal'
+        if rank is not None and rank <= 1000:
+            return 'titan'
         return 'mithril'
-    elif mmr >= 6400: return 'meteorite'
-    elif mmr >= 5000: return 'diamond'
-    elif mmr >= 3600: return 'platinum'
-    elif mmr >= 2400: return 'gold'
-    elif mmr >= 1400: return 'silver'
-    elif mmr >= 600: return 'bronze'
-    elif mmr >= 0: return 'iron'
-    else : return 'unrank'
+    elif mmr >= 6400:
+        return 'meteorite'
+    elif mmr >= 5000:
+        return 'diamond'
+    elif mmr >= 3600:
+        return 'platinum'
+    elif mmr >= 2400:
+        return 'gold'
+    elif mmr >= 1400:
+        return 'silver'
+    elif mmr >= 600:
+        return 'bronze'
+    elif mmr >= 0:
+        return 'iron'
+    return 'unrank'
+
+
 # 캐릭터 역할 매핑
 CHARACTER_ROLE_MAP: dict[int, str] = {
     # 탱커
@@ -166,31 +171,37 @@ _DEALER_ROLES = {"전사", "암살자", "스킬 딜러", "원거리 딜러"}
 
 
 def get_character_role(character_code: int | None) -> str:
-    """캐릭터 코드를 역할 문자열로 변환합니다."""
     if character_code is None:
         return "알 수 없음"
     return CHARACTER_ROLE_MAP.get(int(character_code), "알 수 없음")
+
+
 # 등급 계산 헬퍼
 def _g_high(v: float, s: float, a: float, b: float, c: float) -> str:
-    """값이 클수록 좋은 지표의 등급을 반환합니다."""
-    if v >= s: return "S"
-    if v >= a: return "A"
-    if v >= b: return "B"
-    if v >= c: return "C"
+    if v >= s:
+        return "S"
+    if v >= a:
+        return "A"
+    if v >= b:
+        return "B"
+    if v >= c:
+        return "C"
     return "D"
 
 
 def _g_low(v: float, s: float, a: float, b: float, c: float) -> str:
-    """값이 작을수록 좋은 지표의 등급을 반환합니다."""
-    if v <= s: return "S"
-    if v <= a: return "A"
-    if v <= b: return "B"
-    if v <= c: return "C"
+    if v <= s:
+        return "S"
+    if v <= a:
+        return "A"
+    if v <= b:
+        return "B"
+    if v <= c:
+        return "C"
     return "D"
 
 
 def _best_worst(grades: dict[str, str]) -> tuple[dict, dict]:
-    """등급 딕셔너리에서 최고·최저 항목을 반환합니다."""
     order = {"S": 5, "A": 4, "B": 3, "C": 2, "D": 1}
     sorted_items = sorted(grades.items(), key=lambda x: order.get(x[1], 0))
     worst_field, worst_grade = sorted_items[0]
@@ -199,18 +210,10 @@ def _best_worst(grades: dict[str, str]) -> tuple[dict, dict]:
         {"field": best_field, "grade": best_grade},
         {"field": worst_field, "grade": worst_grade},
     )
+
+
 # 랭크/일반 모드 등급 계산
 def calculate_stat_grades(stat: dict, character_role: str) -> dict:
-    """
-    랭크·일반 모드 stat 딕셔너리를 기반으로 지표별 S~D 등급을 계산합니다.
-
-    Returns:
-        {
-            "grades": {"승률": "A", "KDA": "C", ...},
-            "best":   {"field": "승률", "grade": "A"},
-            "worst":  {"field": "KDA", "grade": "C"},
-        }
-    """
     g: dict[str, str] = {}
 
     g["승률"]          = _g_high(stat.get("win_rate_percentage", 0),  30,   20,   12.5, 10)
@@ -238,11 +241,10 @@ def calculate_stat_grades(stat: dict, character_role: str) -> dict:
 
     best, worst = _best_worst(g)
     return {"grades": g, "best": best, "worst": worst}
+
+
 # 코발트 모드 등급 계산
 def calculate_cobalt_stat_grades(stat: dict, character_role: str) -> dict:
-    """
-    코발트 프로토콜 모드 stat 딕셔너리를 기반으로 지표별 S~D 등급을 계산합니다.
-    """
     g: dict[str, str] = {}
 
     g["승률"]          = _g_high(stat.get("win_rate_percentage", 0), 65,  58,  50,  45)

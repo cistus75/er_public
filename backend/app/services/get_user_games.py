@@ -22,7 +22,6 @@ class GameStatsAnalyzer:
         self.retry_count = 0
 
     async def get_user_games_page(self, next_param=None):
-        """사용자의 특정 페이지 게임 목록을 비동기로 가져옵니다."""
         url = f"/v1/user/games/uid/{self.userId}"
         params = {"next": next_param} if next_param else {}
 
@@ -63,10 +62,6 @@ class GameStatsAnalyzer:
         return None
 
     async def collect_match_data(self, max_games_per_mode: int = 20):
-        """
-        지정 시즌의 랭크/일반/코발트 게임 데이터를 모드별로 최대 N개 수집합니다.
-        수집은 최대 20초 또는 7페이지 이내로 제한합니다.
-        """
         logger.info(
             "매치 데이터 수집 시작 | userId=%s | season=%d | 모드별 최대 %d게임",
             self.userId,
@@ -356,15 +351,6 @@ class GameStatsAnalyzer:
 
     # 외부에서 사용하는 통계 조회 메서드
     def get_detailed_stats(self, mode: str = "ranked") -> dict:
-        """
-        지정 모드의 집계 통계를 딕셔너리로 반환합니다.
-
-        Args:
-            mode: 'ranked' | 'normal' | 'cobalt'
-
-        Returns:
-            통계 딕셔너리. 게임 기록이 없으면 {"no_record": True}.
-        """
         if mode == "cobalt":
             matches_to_analyze = self.cobalt_matches
             if not matches_to_analyze:

@@ -10,7 +10,6 @@ router = APIRouter(tags=["Jobs"])
 settings = get_settings()
 
 async def run_script(script_path: str, script_name: str):
-    """스크립트를 실행하고 출력을 실시간으로 로그에 남기는 함수"""
     python_executable = sys.executable
     
     if not os.path.exists(script_path):
@@ -51,7 +50,6 @@ async def run_script(script_path: str, script_name: str):
     return True
 
 async def run_scripts_in_background_async():
-    """데이터 수집 -> 통계 처리 순차 실행"""
     try:
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
         collector_path = os.path.join(base_dir, 'data-collector', 'collect_data.py')

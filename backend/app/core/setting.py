@@ -1,5 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     # 환경 변수 이름의 대소문자를 구분하지 않도록 설정합니다.
@@ -13,10 +15,10 @@ class Settings(BaseSettings):
     MONGO_URI: str
     MONGO_DB_NAME: str = "er-user-insight"
 
-    # Scheduler
+    # 스케줄러
     SCHEDULER_SECRET_KEY: str
     
-    # App Settings
+    # 애플리케이션
     APP_NAME: str = "ER User Insight"
     SEASON_ID: int = 39
     CORS_ORIGINS: list[str] = [
@@ -26,6 +28,7 @@ class Settings(BaseSettings):
         "https://adina-crystal-ball.vercel.app",
         "https://adina-test.vercel.app",
     ]
+
 
 # 설정 객체는 프로세스 내에서 한 번만 생성합니다.
 @lru_cache

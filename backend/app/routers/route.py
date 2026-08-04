@@ -16,14 +16,8 @@ async def get_route_details_api(
     route_id: int,
     er_client: httpx.AsyncClient = Depends(get_er_client)
 ):
-    """
-    루트 ID를 받아 루트의 핵심 정보(이름, 승률, 추천수, 업데이트 일자)와
-    해당 루트 제작자의 티어 정보를 조합하여 반환합니다.
-    """
-    
     route_data = await er.get_route_async(er_client, route_id)
     
-    # 존재하지 않는 루트는 상세 정보를 만들 수 없습니다.
     if not route_data:
         raise HTTPException(status_code=404, detail=f"Route ID '{route_id}'를 찾을 수 없습니다.")
 

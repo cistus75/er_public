@@ -94,10 +94,6 @@ CHARACTER_MAP = {
 }
 
 def get_latest_character_map(api_key, db_collection):
-    """
-    ER API에서 최신 캐릭터 맵을 가져와 MongoDB에 갱신합니다.
-    API 호출 실패 시, 하드코딩된 CHARACTER_MAP을 Fallback으로 사용합니다.
-    """
     base_map = CHARACTER_MAP.copy()
     if not api_key or db_collection is None:
         return base_map
@@ -129,32 +125,40 @@ def get_latest_character_map(api_key, db_collection):
                     name = parts[1].strip()
                     base_map[code_part] = name
                     
-        # MongoDB에 저장 (콜렉터가 수집 후 백엔드용으로 갱신)
+        # 백엔드도 같은 캐릭터 맵을 사용하도록 수집 결과를 DB에 저장합니다.
         db_collection.update_one({'_id': 'character_map'}, {'$set': {'map': base_map}}, upsert=True)
         return base_map
         
     except Exception as e:
-        print(f"최신 캐릭터 맵 동기화 실패 (Fallback 사용): {e}")
+        print(f"최신 캐릭터 맵 동기화 실패 (기본 맵 사용): {e}")
         return base_map
 
 def get_tier(mmr, rank=None):
-    """
-    MMR과 Rank를 기반으로 정확한 티어를 반환합니다.
-    """
-    if mmr is None: return 'unranked'
+    if mmr is None:
+        return 'unranked'
     
     if mmr >= 7800:
-        if rank is not None and rank <= 300: return 'immortal'
-        if rank is not None and rank <= 1000: return 'titan'
+        if rank is not None and rank <= 300:
+            return 'immortal'
+        if rank is not None and rank <= 1000:
+            return 'titan'
         # 7800 이상이어도 랭크 정보가 없거나 1000위 밖이면 미스릴로 처리합니다.
         return 'mithril'
     # 7100부터 7799까지는 미스릴 구간입니다.
-    elif mmr >= 7100: return 'mithril'
-    elif mmr >= 6400: return 'meteorite'
-    elif mmr >= 5000: return 'diamond'
-    elif mmr >= 3600: return 'platinum'
-    elif mmr >= 2400: return 'gold'
-    elif mmr >= 1400: return 'silver'
-    elif mmr >= 600: return 'bronze'
-    elif mmr >= 0: return 'iron'
-    else : return 'unrank'
+    elif mmr >= 7100:
+        return 'mithril'
+    elif mmr >= 6400:
+        return 'meteorite'
+    elif mmr >= 5000:
+        return 'diamond'
+    elif mmr >= 3600:
+        return 'platinum'
+    elif mmr >= 2400:
+        return 'gold'
+    elif mmr >= 1400:
+        return 'silver'
+    elif mmr >= 600:
+        return 'bronze'
+    elif mmr >= 0:
+        return 'iron'
+    return 'unrank'

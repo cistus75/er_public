@@ -38,7 +38,7 @@ logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 async def lifespan(app: FastAPI):
     await connect_to_mongo()
     
-    # 수집기가 갱신한 캐릭터 맵을 앱 시작 시 메모리에 올립니다.
+    # 수집기가 갱신한 캐릭터 이름을 API 응답에도 반영합니다.
     try:
         db = await get_database()
         if db is not None:
@@ -47,7 +47,7 @@ async def lifespan(app: FastAPI):
                 set_dynamic_character_map(doc['map'])
                 logger.info("MongoDB에서 최신 동적 캐릭터 맵을 메모리에 캐싱 완료했습니다.")
     except Exception as e:
-        logger.warning(f"동적 캐릭터 맵 캐싱 실패 (Fallback 사용할 예정): {e}")
+        logger.warning(f"동적 캐릭터 맵 캐싱 실패 (기본 맵 사용): {e}")
 
     # 연결과 응답에 서로 다른 제한을 두어 외부 API 지연을 구분합니다.
     er_timeout = httpx.Timeout(10.0, connect=30.0)

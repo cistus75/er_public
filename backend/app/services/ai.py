@@ -9,7 +9,6 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-# 여러 프로젝트 키를 순환 사용해 특정 키에 요청이 몰리지 않도록 합니다.
 API_KEYS_STR = os.getenv("GOOGLE_API_KEYS", "")
 API_KEYS = [k.strip() for k in API_KEYS_STR.split(",") if k.strip()]
 
@@ -20,27 +19,23 @@ if not API_KEYS:
 _key_counter = itertools.count()
 
 def _get_next_key_index() -> int:
-    """라운드 로빈 방식으로 다음 키 인덱스를 반환합니다."""
     return next(_key_counter) % len(API_KEYS)
 
 
 # 프롬프트는 요청마다 디스크에서 읽지 않도록 메모리에 캐시합니다.
 @lru_cache(maxsize=None)
 def _load_prompt(prompt_path: str) -> str:
-    """프롬프트 파일을 로드하고 결과를 메모리에 캐싱합니다."""
     with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
 
 
 def _resolve_prompt_path(prompt_filename: str) -> str:
-    """서비스 파일 위치 기준으로 프롬프트 파일의 절대 경로를 반환합니다."""
     services_dir = os.path.dirname(os.path.abspath(__file__))
     backend_dir = os.path.dirname(os.path.dirname(services_dir))
     return os.path.join(backend_dir, "prompt", prompt_filename)
 
 
 async def _call_gemini_api(api_key: str, system_prompt: str) -> str:
-    """httpx를 사용한 REST API 직접 호출 함수"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": system_prompt}]}]
@@ -65,26 +60,12 @@ async def get_ai_analysis_async(
     semaphore: asyncio.Semaphore,
     comparison_stats: dict = None,
 ) -> str:
-    """
-    주어진 프롬프트 파일과 통계 데이터를 기반으로 AI 분석을 수행합니다.
-
-    Args:
-        prompt_filename: prompt/ 폴더 내 프롬프트 파일명
-        stat_data: 분석할 게임 통계 딕셔너리
-        semaphore: Gemini API 동시 요청 제어용 세마포어
-        comparison_stats: 비교 기준 통계 (선택)
-        most_character_number: 최다 사용 캐릭터 코드 (선택)
-
-    Returns:
-        AI 분석 결과 문자열
-    """
     if not stat_data or stat_data.get("no_record"):
         return "분석할 데이터가 부족하다요. 게임을 좀 더 하고 오라요!"
 
     if not API_KEYS:
         return "AI API 키가 설정되지 않아 점을 볼 수 없다요. 관리자에게 문의해라요!"
 
-    # 통계 객체에 포함된 역할과 등급을 프롬프트 변수에 주입합니다.
     try:
         prompt_path = _resolve_prompt_path(prompt_filename)
         base_prompt = _load_prompt(prompt_path)

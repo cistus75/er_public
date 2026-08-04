@@ -29,7 +29,7 @@ export default function ClientLayout({ children }) {
   const openSidebar = () => setSidebarOpen(true);
   const closeSidebar = () => setSidebarOpen(false);
 
-  // theme이 undefined이면 localStorage를 아직 읽기 전 → 렌더링 스킵 (하이드레이션 mismatch 방지)
+  // 저장된 테마를 읽기 전에는 렌더링하지 않아 서버와 화면이 달라지는 문제를 막습니다.
   if (theme === undefined) {
     return null;
   }

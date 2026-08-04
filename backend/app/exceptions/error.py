@@ -24,7 +24,6 @@ async def no_recent_games_exception_handler(request: Request, exc: NoRecentGames
     )
 
 async def generic_exception_handler(request: Request, exc: Exception):
-    """예상치 못한 모든 예외를 처리하는 최후의 보루"""
     logger.error(f"처리되지 않은 예외 발생: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,

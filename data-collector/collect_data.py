@@ -1,42 +1,41 @@
-import os
 import asyncio
 import logging
+import os
+import sys
 from datetime import datetime, timedelta, timezone
-from dateutil import parser 
+
+import httpx
+from aiolimiter import AsyncLimiter
+from dateutil import parser
 from dotenv import load_dotenv
 from pymongo import MongoClient, UpdateOne
-import httpx
-import sys
-
-# Rate Limiting & Retry 적용 라이브러리
-from aiolimiter import AsyncLimiter
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type, RetryError
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 load_dotenv()
 
-# 로깅 설정
+# 로깅
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("DataCollector")
 
-# 수집 설정
+# 저장소
 BASE_URL = "https://open-api.bser.io"
 API_KEY = os.getenv("OPEN_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "er-user-insight" 
 COLLECTION_NAME = "raw_games" 
 
-# 필터링 조건
+# 수집 대상
 TARGET_SEASON_ID = 39        
 TARGET_TEAM_MODE = 3         
 TARGET_MATCHING_MODE = 3     
 TARGET_SERVER_NAME = "Asia"  
 
-# 테스트 목표 및 수집 설정
+# 스캔 범위
 SCAN_LIMIT = 60000
 CHUNK_SIZE = 50   
 DAYS_LIMIT = 7  
 
-# ER API Limit: 1초당 50회 제한 (안전하게 45회로 제한)
+# API 제한보다 여유를 두고 초당 요청 수를 45회로 제한합니다.
 rate_limiter = AsyncLimiter(45, 1)
 REQUIRED_FIELDS = [
     # 식별자와 게임 환경
@@ -80,14 +79,15 @@ REQUIRED_FIELDS = [
     'terminateCount'      
 ]
 
-# 재시도 대상이 되는 예외 조건
-class RateLimitException(Exception): pass
+# 재시도 대상 오류
+class RateLimitException(Exception):
+    pass
 
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=2, max=10),
-    retry=(retry_if_exception_type((httpx.RequestError, RateLimitException))),
-    reraise=True
+    retry=retry_if_exception_type((httpx.RequestError, RateLimitException)),
+    reraise=True,
 )
 async def fetch_with_retry(client: httpx.AsyncClient, url: str, params: dict = None):
     async with rate_limiter:
@@ -103,7 +103,8 @@ async def get_ranker_latest_game_id(client: httpx.AsyncClient, ranker: dict):
         nick_res = await fetch_with_retry(client, "/v1/user/nickname", params={"query": ranker['nickname']})
         data = nick_res.json()
         uid = data.get('user', {}).get('userId')
-        if not uid: return None
+        if not uid:
+            return None
 
         games_res = await fetch_with_retry(client, f"/v1/user/games/uid/{uid}")
         user_games = games_res.json().get("userGames", [])
@@ -159,7 +160,7 @@ async def main():
     db = mongo_client[DB_NAME]
     collection = db[COLLECTION_NAME]
     
-    # 7일 제한 날짜 계산 및 시간대 강제 부여(UTC)
+    # 날짜 비교 기준을 API와 맞추기 위해 UTC를 사용합니다.
     cutoff_date = datetime.now(timezone.utc) - timedelta(days=DAYS_LIMIT)
     logger.info(f"데이터 수집 제한일: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S')} UTC (이전 데이터는 수집 중단)")
     
@@ -167,7 +168,8 @@ async def main():
     
     async with httpx.AsyncClient(base_url=BASE_URL, headers=headers, timeout=15.0) as client:
         current_id = await get_start_id(client)
-        if not current_id: return
+        if not current_id:
+            return
         
         logger.info(f"\n스캔 시작: {current_id}번부터 역순으로 {SCAN_LIMIT}개 탐색")
         logger.info(f"청크 단위({CHUNK_SIZE}개)로 DB에 순차 저장합니다 (Bulk Write).")
@@ -192,10 +194,10 @@ async def main():
                 
                 meta = data['userGames'][0]
                 
-                # 날짜 파싱 및 타임존 일치
                 if meta.get('startDtm'):
                     try:
                         game_dtm = parser.parse(meta['startDtm'])
+                        # 시간대가 없는 응답은 API 기준 시간대인 UTC로 간주합니다.
                         if game_dtm.tzinfo is None:
                             game_dtm = game_dtm.replace(tzinfo=timezone.utc)
                         if game_dtm < cutoff_date:
@@ -204,7 +206,7 @@ async def main():
                     except Exception as e:
                         logger.warning(f"날짜 파싱 실패 (게임ID: {meta.get('gameId')}): {e}")
 
-                # 4가지 핵심 필터링 조건
+                # 랭크 통계에 사용할 게임만 저장합니다.
                 is_target = (
                     meta.get('serverName') == TARGET_SERVER_NAME and
                     meta.get('seasonId') == TARGET_SEASON_ID and 
@@ -225,11 +227,11 @@ async def main():
                             if dt.tzinfo is None:
                                 dt = dt.replace(tzinfo=timezone.utc)
                             filtered['startDtm'] = dt
-                        except: pass
+                        except Exception:
+                            pass
                     
                     processed_game.append(filtered)
                 
-                # Bulk API를 위한 UpdateOne 생성
                 bulk_ops.append(
                     UpdateOne(
                         {"userGames.0.gameId": meta['gameId']},
@@ -245,7 +247,7 @@ async def main():
                 except Exception as e:
                     logger.error(f"MongoDB Bulk Write 에러 발생: {e}")
             else:
-                    logger.info(f"ID {chunk_ids[0]}~{chunk_ids[-1]} 구간: 조건에 맞는 데이터 없음.")
+                logger.info(f"ID {chunk_ids[0]}~{chunk_ids[-1]} 구간: 조건에 맞는 데이터 없음.")
 
     mongo_client.close()
     logger.info("모든 데이터 수집 및 저장 완료.")

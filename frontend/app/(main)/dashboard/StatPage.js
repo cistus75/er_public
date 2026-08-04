@@ -49,7 +49,7 @@ export default function StatPage({
     ? mapComparisonStatToViewModel(comparisonStat, baseStatsMap)
     : null;
 
-  // tierStat이 undefined이면 티어 테이블 자체를 숨깁니다 (일반 모드).
+  // 일반 모드에는 티어 비교 데이터가 없으므로 해당 표를 숨깁니다.
   const hasTierSection = tierStat !== undefined;
   const tierData = hasTierSection && tierStat
     ? mapComparisonStatToViewModel(tierStat, baseStatsMap)

@@ -1,9 +1,11 @@
 import asyncio
 import logging
+import time
+
 import httpx
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from. import ai, er
+from . import ai, er
 from ..common.utils import get_tier
 from .get_badges import get_badges
 
@@ -12,7 +14,6 @@ logger = logging.getLogger(__name__)
 async def get_comparison_stats(
     db: AsyncIOMotorClient, tier: str, rank_stat: dict, normal_stat: dict
 ):
-    """DB에서 비교 통계 데이터를 비동기 병렬로 조회합니다."""
     tasks = []
     
     if tier != 'unrank':
@@ -41,12 +42,8 @@ async def get_user_profile_data(
     userId: str,
     er_client: httpx.AsyncClient,
     gemini_semaphore: asyncio.Semaphore,
-    db: AsyncIOMotorClient
+    db: AsyncIOMotorClient,
 ):
-    """
-    여러 서비스를 조율하여 최종 유저 프로필 데이터를 생성하는 핵심 함수.
-    """
-    import time
     total_start = time.perf_counter()
 
     er_start = time.perf_counter()
@@ -117,7 +114,9 @@ async def get_user_profile_data(
         else:
             ai_status.append(f"{label}:OK")
 
-    def get_count(s): return s.get('total_games_analyzed', 0) if not s.get('no_record') else 0
+    def get_count(stat):
+        return stat.get('total_games_analyzed', 0) if not stat.get('no_record') else 0
+
     m_counts = f"R:{get_count(rank_stat)} N:{get_count(normal_stat)} C:{get_count(cobalt_stat)}"
     most_char = rank_stat.get('most_used_character_name', '없음')
 

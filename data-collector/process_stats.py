@@ -1,15 +1,15 @@
 import os
 import sys
-from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
+
 from dotenv import load_dotenv
+from pymongo import MongoClient
 
 load_dotenv()
 
-# 프로젝트 루트에서 공용 유틸리티를 불러옵니다.
+# 단독 실행 시에도 같은 디렉터리의 공용 유틸리티를 찾을 수 있도록 경로를 추가합니다.
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
-# 캐릭터 맵 로드 함수
 try:
     from utils import get_latest_character_map
 except ImportError:
@@ -49,7 +49,7 @@ def main():
             print("경고: 집계할 최신 데이터가 없습니다. 종료합니다.")
             return
 
-        # allowDiskUse 활성화 (대규모 데이터 대비)
+        # 데이터가 메모리를 넘더라도 집계를 계속할 수 있도록 디스크 사용을 허용합니다.
         aggregation_options = {'allowDiskUse': True}
 
         base_pipeline = [
@@ -105,7 +105,7 @@ def main():
             'avg_emp_drone': {'$avg': '$userGames.useEmpDrone'}
         }
         
-        # 저장 전에 공통으로 반올림할 필드입니다.
+        # 모드별 결과의 숫자 자릿수를 같은 기준으로 맞춥니다.
         common_project_stage = {
             'win_rate': {'$round': [{'$divide': ['$total_wins', '$total_games']}, 4]},
             'top3_rate': {'$round': [{'$divide': ['$total_top3', '$total_games']}, 4]},
@@ -170,9 +170,8 @@ def main():
                 stat['pick_rate'] = round(stat['total_games_for_pick_rate'] / total_games_in_pool, 4) if total_games_in_pool > 0 else 0
                 del stat['total_games_for_pick_rate']
 
-            # 원자적 처리(다운타임 제거)를 위해 임시 컬렉션에 등록 후 Swap
+            # 조회 중인 컬렉션을 비우지 않도록 임시 컬렉션을 완성한 뒤 교체합니다.
             temp_char_col = db['temp_high_mmr_char_stats']
-            # 이전 실행에서 남은 임시 문서를 비웁니다.
             temp_char_col.delete_many({})
             temp_char_col.insert_many(high_mmr_char_results)
             temp_char_col.rename('high_mmr_char_stats', dropTarget=True)
