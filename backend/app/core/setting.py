@@ -1,10 +1,8 @@
-# app/core/setting.py
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
 
 class Settings(BaseSettings):
-    # Pydantic이 환경 변수를 읽도록 설정 (대소문자 구분 안 함)
+    # 환경 변수 이름의 대소문자를 구분하지 않도록 설정합니다.
     model_config = SettingsConfigDict(case_sensitive=False)
 
     # ER API
@@ -29,7 +27,7 @@ class Settings(BaseSettings):
         "https://adina-test.vercel.app",
     ]
 
-# 설정 객체를 프로세스 내에서 한 번만 만들도록 캐시합니다.
+# 설정 객체는 프로세스 내에서 한 번만 생성합니다.
 @lru_cache
 def get_settings() -> Settings:
     return Settings()

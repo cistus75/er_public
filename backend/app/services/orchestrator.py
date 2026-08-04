@@ -1,5 +1,3 @@
-# app/services/orchestrator.py
-
 import asyncio
 import logging
 import httpx
@@ -18,7 +16,7 @@ async def get_comparison_stats(
     tasks = []
     
     if tier != 'unrank':
-        # 데이터 수집기가 돌아 데미갓 통계가 DB에 쌓이기 전까지는 mithril을 빌려다 씁니다. (유저 요청: 미스릴+ 통합)
+        # 데미갓 이상 통계가 쌓이기 전까지 미스릴 통계를 공통 기준으로 사용합니다.
         query_tier = tier if tier not in ['demigod', 'titan', 'immortal'] else 'mithril'
         tasks.append(db.tier_overall_stats.find_one({'tier': query_tier}, {'_id': 0}))
     else:
@@ -58,7 +56,7 @@ async def get_user_profile_data(
     )
     er_duration = time.perf_counter() - er_start
 
-    # 분석할 게임 기록이 전혀 없는 경우, None을 반환하여 라우터에서 404 처리를 하도록 합니다.
+    # 분석할 기록이 없으면 라우터에서 404로 처리할 수 있도록 None을 반환합니다.
     if rank_stat.get('no_record') and normal_stat.get('no_record'):
         return None
 
@@ -75,7 +73,7 @@ async def get_user_profile_data(
 
     tasks = {}
     if not rank_stat.get('no_record'):
-        # get_badges는 동기 함수이므로 to_thread로 감싸 이벤트 루프 차단을 방지합니다.
+        # 동기 배지 계산이 이벤트 루프를 막지 않도록 별도 스레드에서 실행합니다.
         tasks['badges'] = asyncio.to_thread(get_badges, rank_stat, rank_result)
         tasks['rank_ai'] = ai.get_ai_analysis_async(
             prompt_filename='rank_ai_analysis_prompt.txt',
@@ -101,7 +99,7 @@ async def get_user_profile_data(
             stat_data=cobalt_stat, semaphore=gemini_semaphore,
         )
 
-    # return_exceptions=True를 통해 일부 작업이 실패해도 전체가 중단되지 않습니다.
+    # 일부 AI 작업이 실패해도 나머지 결과는 계속 반환합니다.
     ai_start = time.perf_counter()
     task_results = await asyncio.gather(*tasks.values(), return_exceptions=True)
     results_dict = dict(zip(tasks.keys(), task_results))
@@ -119,7 +117,6 @@ async def get_user_profile_data(
         else:
             ai_status.append(f"{label}:OK")
 
-    # 수집 판수 및 모스트 정보 요약
     def get_count(s): return s.get('total_games_analyzed', 0) if not s.get('no_record') else 0
     m_counts = f"R:{get_count(rank_stat)} N:{get_count(normal_stat)} C:{get_count(cobalt_stat)}"
     most_char = rank_stat.get('most_used_character_name', '없음')

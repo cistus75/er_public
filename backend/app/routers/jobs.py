@@ -19,31 +19,28 @@ async def run_script(script_path: str, script_name: str):
 
     logger.info(f"{script_name} 시작...")
     
-    # 서브프로세스 생성 (stdout을 PIPE로 설정)
+    # 표준 출력과 오류 출력을 별도 스트림으로 받아 실행 상태를 바로 기록합니다.
     process = await asyncio.create_subprocess_exec(
         python_executable, "-u", script_path,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE
     )
 
-    # 실시간 로그 출력을 위한 비동기 스트림 리더
     async def log_stream(stream, prefix):
         while True:
             line = await stream.readline()
             if not line:
                 break
-            # 바이트를 문자열로 디코딩하고 공백 제거 후 출력
             decoded_line = line.decode().strip()
             if decoded_line:
                 logger.info(f"[{prefix}] {decoded_line}")
 
-    # stdout과 stderr를 동시에 감시
+    # 두 스트림을 동시에 읽어 한쪽 출력 때문에 프로세스가 막히지 않도록 합니다.
     await asyncio.gather(
         log_stream(process.stdout, script_name),
         log_stream(process.stderr, f"{script_name} ERROR")
     )
 
-    # 프로세스 종료 대기
     return_code = await process.wait()
 
     if return_code != 0:

@@ -172,7 +172,8 @@ def main():
 
             # 원자적 처리(다운타임 제거)를 위해 임시 컬렉션에 등록 후 Swap
             temp_char_col = db['temp_high_mmr_char_stats']
-            temp_char_col.delete_many({}) # 만약 잔여물 있으면 클리어
+            # 이전 실행에서 남은 임시 문서를 비웁니다.
+            temp_char_col.delete_many({})
             temp_char_col.insert_many(high_mmr_char_results)
             temp_char_col.rename('high_mmr_char_stats', dropTarget=True)
             print(f"캐릭터별 통계 {len(high_mmr_char_results)}개 무중단 저장 완료.")

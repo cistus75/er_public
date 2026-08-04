@@ -19,7 +19,7 @@ class GameStatsAnalyzer:
         self.userId = userId
         self.client = client
         self.season_id = season_id
-        self.retry_count = 0  # 429 등 재시도 횟수 추적
+        self.retry_count = 0
 
     async def get_user_games_page(self, next_param=None):
         """사용자의 특정 페이지 게임 목록을 비동기로 가져옵니다."""
@@ -34,7 +34,7 @@ class GameStatsAnalyzer:
                 return response.json()
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:
-                    self.retry_count += 1 # 재시도 카운트 증가
+                    self.retry_count += 1
                     wait_time = (2 ** i) * 0.5
                     logger.warning(
                         "API 호출 제한(429) 발생. %.2f초 후 재시도 (시도 %d/%d) | userId=%s",
@@ -83,7 +83,7 @@ class GameStatsAnalyzer:
         start_time = time.time()
 
         for page in range(3):
-            # 모든 모드 목표 달성 시 조기 종료
+            # 모든 모드의 목표 개수를 채우면 추가 페이지를 요청하지 않습니다.
             if (
                 len(ranked_games) >= max_games_per_mode
                 and len(normal_games) >= max_games_per_mode
@@ -149,8 +149,8 @@ class GameStatsAnalyzer:
                 self.userId,
             )
 
-    # 내부 통계 계산 메서드
 
+    # 내부 통계 계산 메서드
     def _calculate_kda(self, matches: list) -> dict:
         if not matches:
             return {"kda": 0.0, "avg_kills": 0.0, "avg_assists": 0.0, "avg_deaths": 0.0}
@@ -271,7 +271,8 @@ class GameStatsAnalyzer:
 
             if mode == "cobalt":
                 wins = sum(1 for m in char_matches if m.get("victory", 0) == 1)
-                top3 = wins # 코발트 모드는 4:4 이므로 승리가 곧 Top 3 진입과 동일하게 처리 (혹은 무의미)
+                # 코발트는 승패만 제공하므로 승리를 Top 3 진입으로 취급합니다.
+                top3 = wins
             else:
                 wins = sum(1 for m in char_matches if m.get("gameRank", 0) == 1)
                 top3 = sum(1 for m in char_matches if 1 <= m.get("gameRank", 0) <= 3)
@@ -352,8 +353,8 @@ class GameStatsAnalyzer:
             return 0.0
         return round(mean(m.get("useEmpDrone", 0) for m in matches), 1)
 
-    # 외부에서 사용하는 통계 조회 메서드
 
+    # 외부에서 사용하는 통계 조회 메서드
     def get_detailed_stats(self, mode: str = "ranked") -> dict:
         """
         지정 모드의 집계 통계를 딕셔너리로 반환합니다.

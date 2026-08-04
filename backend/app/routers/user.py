@@ -1,5 +1,3 @@
-# app/routers/user.py
-
 import logging
 from fastapi import APIRouter, Request, Depends, HTTPException
 import httpx
@@ -14,7 +12,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/users", tags=["Users"])
 settings = get_settings()
 
-# --- API 엔드포인트 ---
+# API 엔드포인트
 @router.get("/num/{nickname}")
 async def get_user_num_api(nickname: str, client: httpx.AsyncClient = Depends(get_er_client)):
     url = "/v1/user/nickname"

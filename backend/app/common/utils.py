@@ -1,6 +1,7 @@
 import os
 
 # API에서 캐릭터 맵을 가져오지 못할 때 사용할 기본 맵입니다.
+
 CHARACTER_MAP = {
     "1": "재키",
     "2": "아야",
@@ -130,10 +131,7 @@ def get_tier(mmr, rank=None):
     elif mmr >= 600: return 'bronze'
     elif mmr >= 0: return 'iron'
     else : return 'unrank'
-
-
 # 캐릭터 역할 매핑
-
 CHARACTER_ROLE_MAP: dict[int, str] = {
     # 탱커
     4: "탱커", 13: "탱커", 20: "탱커", 30: "탱커", 45: "탱커",
@@ -172,10 +170,7 @@ def get_character_role(character_code: int | None) -> str:
     if character_code is None:
         return "알 수 없음"
     return CHARACTER_ROLE_MAP.get(int(character_code), "알 수 없음")
-
-
 # 등급 계산 헬퍼
-
 def _g_high(v: float, s: float, a: float, b: float, c: float) -> str:
     """값이 클수록 좋은 지표의 등급을 반환합니다."""
     if v >= s: return "S"
@@ -204,10 +199,7 @@ def _best_worst(grades: dict[str, str]) -> tuple[dict, dict]:
         {"field": best_field, "grade": best_grade},
         {"field": worst_field, "grade": worst_grade},
     )
-
-
 # 랭크/일반 모드 등급 계산
-
 def calculate_stat_grades(stat: dict, character_role: str) -> dict:
     """
     랭크·일반 모드 stat 딕셔너리를 기반으로 지표별 S~D 등급을 계산합니다.
@@ -246,10 +238,7 @@ def calculate_stat_grades(stat: dict, character_role: str) -> dict:
 
     best, worst = _best_worst(g)
     return {"grades": g, "best": best, "worst": worst}
-
-
 # 코발트 모드 등급 계산
-
 def calculate_cobalt_stat_grades(stat: dict, character_role: str) -> dict:
     """
     코발트 프로토콜 모드 stat 딕셔너리를 기반으로 지표별 S~D 등급을 계산합니다.

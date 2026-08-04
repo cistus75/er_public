@@ -23,13 +23,12 @@ async def get_route_details_api(
     
     route_data = await er.get_route_async(er_client, route_id)
     
-    # 만약 API로부터 받은 데이터가 없으면 404 에러를 반환합니다.
+    # 존재하지 않는 루트는 상세 정보를 만들 수 없습니다.
     if not route_data:
         raise HTTPException(status_code=404, detail=f"Route ID '{route_id}'를 찾을 수 없습니다.")
 
-    # 필요한 루트 정보가 담긴 객체를 안전하게 추출합니다.
     route_info = route_data.get('recommendWeaponRoute', {})
-    userNickname = route_info.get('userNickname') # 제작자 티어 조회를 위해 닉네임을 가져옵니다.
+    userNickname = route_info.get('userNickname')
 
     creator_tier = "Unranked"
     if userNickname:

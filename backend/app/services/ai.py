@@ -1,5 +1,3 @@
-# app/services/ai.py
-
 import os
 import json
 import logging
@@ -86,6 +84,7 @@ async def get_ai_analysis_async(
     if not API_KEYS:
         return "AI API 키가 설정되지 않아 점을 볼 수 없다요. 관리자에게 문의해라요!"
 
+    # 통계 객체에 포함된 역할과 등급을 프롬프트 변수에 주입합니다.
     try:
         prompt_path = _resolve_prompt_path(prompt_filename)
         base_prompt = _load_prompt(prompt_path)
@@ -96,7 +95,6 @@ async def get_ai_analysis_async(
         logger.exception("프롬프트 파일 로드 중 예기치 않은 오류가 발생했습니다: %s", prompt_filename)
         return "시스템 오류: 프롬프트 파일을 읽는 중 문제가 생겼다요."
 
-    # 분석 결과에 필요한 역할·등급 정보는 통계 객체에서 함께 전달합니다.
     try:
         character_role = stat_data.get("character_role", "알 수 없음")
         stat_grades = stat_data.get("stat_grades", {})
@@ -142,7 +140,7 @@ async def get_ai_analysis_async(
                     "AI 분석 API 오류 (Status %d) | prompt=%s | key=...%s | 다음 키로 전환합니다. (%d/%d)",
                     status, prompt_filename, selected_key[-4:], i + 1, num_keys,
                 )
-                # 429/503은 다른 프로젝트 키로 바꾸면 성공 가능성이 높으므로 짧은 유예 후 전환
+                # 일시적인 제한은 다른 키로 바꾸기 전에 짧게 기다립니다.
                 if status in (429, 503):
                     await asyncio.sleep(0.3)
                 continue
@@ -163,7 +161,6 @@ async def get_ai_analysis_async(
                 )
                 continue
 
-        # 모든 키를 시도했음에도 성공하지 못한 경우
         logger.warning(
             "AI 분석 전체 키 소진 | prompt=%s | 총 %d개 키 시도 실패 (최종 오류: %s)",
             prompt_filename, num_keys, str(last_exception),

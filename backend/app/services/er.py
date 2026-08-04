@@ -1,5 +1,3 @@
-# app/services/eternal_return.py
-
 import logging
 import httpx
 
@@ -52,7 +50,7 @@ async def get_user_games_all_modes_async(client: httpx.AsyncClient, userId: str)
         return rank_stat, normal_stat, cobalt_stat, analyzer.retry_count
     except Exception as e:
         logger.error(f"유저 게임 통계 분석 중 오류 발생 (userId: {userId}): {e}")
-        # 실패 시 모든 모드에 대해 'no_record'를 반환하고 재시도 횟수는 0으로 설정합니다.
+        # 한 모드의 실패가 전체 프로필 응답을 막지 않도록 빈 통계를 반환합니다.
         no_record_stat = {"no_record": True}
         return no_record_stat, no_record_stat, no_record_stat, 0
     

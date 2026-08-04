@@ -1,5 +1,3 @@
-# app/main.py
-
 import asyncio
 import logging
 import time
@@ -31,8 +29,7 @@ settings = get_settings()
 
 class HealthCheckFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        # 로그 메시지에 "/health" 문자열이 포함되어 있으면
-        # False를 반환하여 로그에서 제외시킵니다.
+        # 헬스 체크 요청은 주기적으로 발생하므로 접근 로그에서 제외합니다.
         return record.getMessage().find("/health") == -1
 
 logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
@@ -41,7 +38,7 @@ logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 async def lifespan(app: FastAPI):
     await connect_to_mongo()
     
-    # DB에서 수집기가 최신화한 동적 캐릭터 맵을 메모리에 캐싱
+    # 수집기가 갱신한 캐릭터 맵을 앱 시작 시 메모리에 올립니다.
     try:
         db = await get_database()
         if db is not None:
@@ -52,7 +49,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"동적 캐릭터 맵 캐싱 실패 (Fallback 사용할 예정): {e}")
 
-    # 세분화된 타임아웃 설정
+    # 연결과 응답에 서로 다른 제한을 두어 외부 API 지연을 구분합니다.
     er_timeout = httpx.Timeout(10.0, connect=30.0)
     app.state.er_client = httpx.AsyncClient(
         base_url=settings.ER_BASE_URL,
@@ -61,10 +58,10 @@ async def lifespan(app: FastAPI):
     )
     
 
-    # Gemini API 동시 요청 수를 5개로 제한하는 세마포어
+    # 동시 AI 요청 수를 제한해 API 과부하를 막습니다.
     app.state.gemini_semaphore = asyncio.Semaphore(5)
     
-    yield # 애플리케이션 실행
+    yield
     
     await close_mongo_connection()
     await app.state.er_client.aclose()
