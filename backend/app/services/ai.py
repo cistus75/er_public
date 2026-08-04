@@ -11,22 +11,14 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-# =========================================================
-# 🔑 [API 키 로테이션 설정]
-# 환경변수 'GOOGLE_API_KEYS'에서 쉼표로 구분된 키 목록을 로드합니다.
-# =========================================================
+# 여러 프로젝트 키를 순환 사용해 특정 키에 요청이 몰리지 않도록 합니다.
 API_KEYS_STR = os.getenv("GOOGLE_API_KEYS", "")
 API_KEYS = [k.strip() for k in API_KEYS_STR.split(",") if k.strip()]
 
 if not API_KEYS:
     logger.warning("GOOGLE_API_KEYS 환경 변수가 설정되지 않았습니다. AI 분석 기능을 사용할 수 없습니다.")
 
-# =========================================================
-# 🎯 [라운드 로빈 키 분배기]
-# 동시 요청이 들어와도 각 요청이 서로 다른 프로젝트 키를 자동으로 배정받아
-# 특정 프로젝트에 호출이 몰리는 현상을 방지합니다.
-# itertools.count는 원자적(atomic)이므로 asyncio 환경에서 안전합니다.
-# =========================================================
+# 호출마다 키를 순환 선택해 동시 요청을 여러 프로젝트로 분산합니다.
 _key_counter = itertools.count()
 
 def _get_next_key_index() -> int:
@@ -34,10 +26,7 @@ def _get_next_key_index() -> int:
     return next(_key_counter) % len(API_KEYS)
 
 
-# =========================================================
-# 📄 [프롬프트 파일 캐싱]
-# 요청마다 디스크를 읽는 대신, 첫 번째 로드 이후 메모리에 캐싱합니다.
-# =========================================================
+# 프롬프트는 요청마다 디스크에서 읽지 않도록 메모리에 캐시합니다.
 @lru_cache(maxsize=None)
 def _load_prompt(prompt_path: str) -> str:
     """프롬프트 파일을 로드하고 결과를 메모리에 캐싱합니다."""
@@ -52,9 +41,6 @@ def _resolve_prompt_path(prompt_filename: str) -> str:
     return os.path.join(backend_dir, "prompt", prompt_filename)
 
 
-# =========================================================
-# 🔄 [REST API 호출 함수]
-# =========================================================
 async def _call_gemini_api(api_key: str, system_prompt: str) -> str:
     """httpx를 사용한 REST API 직접 호출 함수"""
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
@@ -75,9 +61,6 @@ async def _call_gemini_api(api_key: str, system_prompt: str) -> str:
             raise Exception("API 응답 구조 분석 실패") from e
 
 
-# =========================================================
-# 🤖 [AI 분석 메인 함수]
-# =========================================================
 async def get_ai_analysis_async(
     prompt_filename: str,
     stat_data: dict,
@@ -97,15 +80,12 @@ async def get_ai_analysis_async(
     Returns:
         AI 분석 결과 문자열
     """
-    # 1. 데이터 검증
     if not stat_data or stat_data.get("no_record"):
         return "분석할 데이터가 부족하다요. 게임을 좀 더 하고 오라요!"
 
-    # 2. API 키 검증
     if not API_KEYS:
         return "AI API 키가 설정되지 않아 점을 볼 수 없다요. 관리자에게 문의해라요!"
 
-    # 3. 프롬프트 파일 로드 (캐시 우선)
     try:
         prompt_path = _resolve_prompt_path(prompt_filename)
         base_prompt = _load_prompt(prompt_path)
@@ -116,8 +96,7 @@ async def get_ai_analysis_async(
         logger.exception("프롬프트 파일 로드 중 예기치 않은 오류가 발생했습니다: %s", prompt_filename)
         return "시스템 오류: 프롬프트 파일을 읽는 중 문제가 생겼다요."
 
-    # 4. 프롬프트 포맷팅
-    # stat_data에 character_role과 stat_grades가 이미 포함되어 있으므로 추출해서 주입합니다.
+    # 분석 결과에 필요한 역할·등급 정보는 통계 객체에서 함께 전달합니다.
     try:
         character_role = stat_data.get("character_role", "알 수 없음")
         stat_grades = stat_data.get("stat_grades", {})
@@ -133,11 +112,10 @@ async def get_ai_analysis_async(
         )
         return "시스템 오류: 프롬프트와 데이터 형식이 맞지 않는다요."
 
-    # 5. 라운드 로빈 키 선택 + 실패 시 전체 키 순차 폴백
+    # 키 하나가 실패해도 다른 프로젝트로 요청을 이어갑니다.
     is_angpyeong = 'angpyeong' in prompt_filename
 
     async with semaphore:
-        # 라운드 로빈으로 시작 키를 결정하여 프로젝트별 부하를 균등 분배합니다.
         start_idx = _get_next_key_index()
         num_keys = len(API_KEYS)
         last_exception = None

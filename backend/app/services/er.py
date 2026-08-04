@@ -3,8 +3,7 @@
 import logging
 import httpx
 
-# ✨ get_user_games.py 파일의 GameStatsAnalyzer 클래스를 직접 import 합니다.
-# 이 클래스도 나중에 이 서비스 파일 안으로 옮기는 것을 고려할 수 있습니다.
+# 게임 통계 집계 로직은 별도 분석기에 두고 API 서비스에서는 호출만 담당합니다.
 from .get_user_games import GameStatsAnalyzer
 from..core.setting import get_settings
 

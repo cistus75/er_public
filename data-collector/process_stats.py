@@ -4,10 +4,9 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
-# 1. 환경 변수 로드
 load_dotenv()
 
-# 2. 경로 설정 (utils 모듈 import용)
+# 프로젝트 루트에서 공용 유틸리티를 불러옵니다.
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 # 캐릭터 맵 로드 함수
@@ -17,7 +16,7 @@ except ImportError:
     def get_latest_character_map(api_key, db):
         return {} 
 
-# --- 설정 ---
+# 집계 설정
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "er-user-insight"
 MMR_THRESHOLD_FOR_CHAR_STATS = 5000 
@@ -25,7 +24,7 @@ DATA_RANGE_DAYS = 7
 
 def main():
     if not MONGO_URI:
-        print("❌ 에러: MONGO_URI 환경 변수가 설정되지 않았습니다.")
+        print("에러: MONGO_URI 환경 변수가 설정되지 않았습니다.")
         return
 
     client = None
@@ -35,19 +34,19 @@ def main():
         
         raw_games_collection = db['raw_games']
         
-        print("✅ MongoDB에 성공적으로 연결되었습니다.")
+        print("MongoDB에 성공적으로 연결되었습니다.")
 
         api_key = os.getenv("OPEN_API_KEY")
         character_map = get_latest_character_map(api_key, db['metadata'])
         
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=DATA_RANGE_DAYS)
-        print(f"📅 통계 집계 기준일: {cutoff_date} (이후 데이터만 사용)")
+        print(f"통계 집계 기준일: {cutoff_date} (이후 데이터만 사용)")
 
         matched_count = raw_games_collection.count_documents({'userGames.0.startDtm': {'$gte': cutoff_date}})
-        print(f"🔍 대상 데이터 수: {matched_count}건")
+        print(f"대상 데이터 수: {matched_count}건")
 
         if matched_count == 0:
-            print("⚠️ 경고: 집계할 최신 데이터가 없습니다. 종료합니다.")
+            print("경고: 집계할 최신 데이터가 없습니다. 종료합니다.")
             return
 
         # allowDiskUse 활성화 (대규모 데이터 대비)
@@ -58,7 +57,7 @@ def main():
             {'$unwind': '$userGames'}
         ]
         
-        # [티어 계산 단계] utils.py와 맞추어 데미갓(7800+) 추가
+        # 백엔드의 티어 구간과 같은 기준으로 집계합니다.
         tier_calculation_stage = {
             '$addFields': {
                 'tier': {
@@ -78,7 +77,7 @@ def main():
             }
         }
 
-        # --- 공통 그룹화 로직 ---
+        # 모드별 집계에서 공통으로 사용하는 필드입니다.
         common_group_stage = {
             'total_games': {'$sum': 1},
             'total_wins': {'$sum': {'$cond': [{'$eq': ['$userGames.gameRank', 1]}, 1, 0]}},
@@ -106,7 +105,7 @@ def main():
             'avg_emp_drone': {'$avg': '$userGames.useEmpDrone'}
         }
         
-        # --- 공통 데이터 다듬기($project) 로직 ---
+        # 저장 전에 공통으로 반올림할 필드입니다.
         common_project_stage = {
             'win_rate': {'$round': [{'$divide': ['$total_wins', '$total_games']}, 4]},
             'top3_rate': {'$round': [{'$divide': ['$total_top3', '$total_games']}, 4]},
@@ -141,7 +140,7 @@ def main():
             'avg_emp_drone': {'$round': ['$avg_emp_drone', 1]}
         }
 
-        # --- [1/2] 상위 MMR 캐릭터별 통계 ---
+        # 상위 MMR 구간의 캐릭터별 통계를 계산합니다.
         print(f"\n[1/2] {MMR_THRESHOLD_FOR_CHAR_STATS} MMR 이상 캐릭터별 통계 계산 중...")
         
         high_mmr_char_pipeline = base_pipeline + [
@@ -176,11 +175,11 @@ def main():
             temp_char_col.delete_many({}) # 만약 잔여물 있으면 클리어
             temp_char_col.insert_many(high_mmr_char_results)
             temp_char_col.rename('high_mmr_char_stats', dropTarget=True)
-            print(f"✅ 캐릭터별 통계 {len(high_mmr_char_results)}개 무중단 저장 완료.")
+            print(f"캐릭터별 통계 {len(high_mmr_char_results)}개 무중단 저장 완료.")
         else:
-            print(f"ℹ️ 캐릭터 통계를 생성할 데이터가 없습니다.")
+            print("캐릭터 통계를 생성할 데이터가 없습니다.")
 
-        # --- [2/2] 티어별 종합 통계 ---
+        # 티어별 종합 통계를 계산합니다.
         print("\n[2/2] 티어별 종합 통계 계산 중...")
         
         tier_overall_pipeline = base_pipeline + [
@@ -199,17 +198,16 @@ def main():
         tier_overall_results = list(raw_games_collection.aggregate(tier_overall_pipeline, **aggregation_options))
         
         if tier_overall_results:
-            # 원자적 처리
             temp_tier_col = db['temp_tier_overall_stats']
             temp_tier_col.delete_many({})
             temp_tier_col.insert_many(tier_overall_results)
             temp_tier_col.rename('tier_overall_stats', dropTarget=True)
-            print(f"✅ 티어별 종합 통계 {len(tier_overall_results)}개 무중단 저장 완료.")
+            print(f"티어별 종합 통계 {len(tier_overall_results)}개 무중단 저장 완료.")
         else:
-            print("ℹ️ 티어별 통계를 생성할 데이터가 없습니다.")
+            print("티어별 통계를 생성할 데이터가 없습니다.")
 
     except Exception as e:
-        print(f"❌ 스크립트 실행 중 오류 발생: {e}")
+        print(f"스크립트 실행 중 오류 발생: {e}")
     finally:
         if client:
             client.close()

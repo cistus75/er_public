@@ -25,7 +25,7 @@
 .charCard {
   display: flex;
   align-items: center;
-  gap: 20px; /* 이미지와 정보 사이 간격 */
+  gap: 20px;
   background-color: #2f2f2f;
   padding: 15px;
   border-radius: 10px;
@@ -40,21 +40,21 @@
 .charInfo {
   display: flex;
   flex-direction: column;
-  gap: 8px; /* 위아래 줄 간격 */
+  gap: 8px;
   width: 100%;
 }
 
 .rowTop, .rowBottom {
   display: flex;
-  align-items: baseline; /* 텍스트 높이 정렬 */
+  align-items: baseline;
 }
 
 .rowTop {
-  gap: 10px; /* 캐릭터 이름과 판 수 사이 간격 */
+  gap: 10px;
 }
 
 .rowBottom {
-  justify-content: space-between; /* 자식 요소들을 균등하게 배치 */
+  justify-content: space-between;
   width: 100%;
   font-size: 0.9em;
   color: #ccc;

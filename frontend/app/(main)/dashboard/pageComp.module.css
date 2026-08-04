@@ -47,7 +47,6 @@
   padding-bottom: 10px;
 }
 
-/* 데이터 없음 모듈 스타일 */
 .noDataModule {
     display: flex;
     flex-direction: column;

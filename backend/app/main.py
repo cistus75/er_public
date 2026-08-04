@@ -14,7 +14,6 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-# 분리된 모듈들 import
 from .core.setting import get_settings
 from .db.db import connect_to_mongo, close_mongo_connection, get_database
 from .common.utils import set_dynamic_character_map
@@ -27,7 +26,6 @@ from .exceptions.error import (
     generic_exception_handler,
 )
 
-# --- 로거 설정 ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [%(levelname)s] - %(name)s (%(filename)s:%(lineno)d) - %(message)s')
 settings = get_settings()
 
@@ -37,13 +35,10 @@ class HealthCheckFilter(logging.Filter):
         # False를 반환하여 로그에서 제외시킵니다.
         return record.getMessage().find("/health") == -1
 
-# Uvicorn의 'access' 로거에 필터를 추가합니다.
 logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 
-# --- Lifespan: 앱 시작/종료 시 실행될 로직 (최신 방식) ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # --- 앱 시작 시 ---
     await connect_to_mongo()
     
     # DB에서 수집기가 최신화한 동적 캐릭터 맵을 메모리에 캐싱
@@ -71,20 +66,16 @@ async def lifespan(app: FastAPI):
     
     yield # 애플리케이션 실행
     
-    # --- 앱 종료 시 ---
     await close_mongo_connection()
     await app.state.er_client.aclose()
 
-# --- FastAPI 앱 생성 및 설정 ---
 app = FastAPI(title=settings.APP_NAME, lifespan=lifespan)
 
-# Rate Limiter
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-# --- 병목 추적 및 상세 로깅 미들웨어 ---
 logger = logging.getLogger(__name__)
 
 @app.middleware("http")
@@ -107,7 +98,6 @@ async def log_request_time(request: Request, call_next):
             
     return response
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -129,13 +119,10 @@ async def uptime_check():
     return {"status": "uptime health check"}
 
 
-# 커스텀 예외 핸들러 등록
 app.add_exception_handler(UserNotFoundException, user_not_found_exception_handler)
 app.add_exception_handler(NoRecentGamesException, no_recent_games_exception_handler)
 app.add_exception_handler(Exception, generic_exception_handler)
 
-# 분리된 라우터 포함
 app.include_router(user.router)
 app.include_router(jobs.router)
 app.include_router(route.router)
-

@@ -64,7 +64,7 @@ export default function CobaltPage({cobaltStat, ai, loading }) {
             <div className={styles['table-section']}>
                 <StatTable
                     title="내 평균 지표"
-                    data={cobaltStatData} // 수정한 부분
+                    data={cobaltStatData}
                     tooltipText="최근 코발트 게임 20판의 데이터로 평균 지표를 나타냅니다."
                     isDetailedVisible={isDetailedVisible}
                     onToggleDetailed={toggleDetailedVisibility}

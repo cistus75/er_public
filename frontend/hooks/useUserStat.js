@@ -1,18 +1,8 @@
 'use client';
 
-/**
- * hooks/useUserStat.js
- * 상태 계층 — 유저 닉네임을 받아 userId 조회 → 통계 조회를 수행하는 커스텀 훅.
- * DashboardContent의 11개 useState + fetch 로직을 캡슐화합니다.
- */
-
 import { useEffect, useState } from 'react';
 import { getUserId, getUserStat } from '@/lib/api/userApi';
 
-/**
- * @param {string|null} nickname
- * @returns {{ data: object|null, loading: boolean, error: string|null }}
- */
 export function useUserStat(nickname) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -53,7 +43,7 @@ export function useUserStat(nickname) {
 
     fetchData();
 
-    // 검색어가 바뀌면 이전 요청 결과를 무시합니다 (race condition 방지)
+    // 검색어가 바뀌면 이전 요청이 늦게 끝나도 현재 화면을 덮어쓰지 않도록 합니다.
     return () => {
       cancelled = true;
     };

@@ -1,5 +1,3 @@
-// frontend/app/components/Analytics.js (전체 수정본)
-
 'use client'
 
 import Script from 'next/script'
@@ -13,10 +11,10 @@ export default function Analytics() {
   return (
     <>
       <Script
-        strategy="afterInteractive" // ✨ 'lazyOnload'에서 변경
+        strategy="afterInteractive"
         src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
       />
-      <Script id="ga-analytics" strategy="afterInteractive"> {/* ✨ 'lazyOnload'에서 변경 */}
+      <Script id="ga-analytics" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

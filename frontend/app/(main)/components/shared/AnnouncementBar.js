@@ -1,15 +1,5 @@
 'use client';
 
-/**
- * AnnouncementBar.js
- * 프레젠테이션 계층 — 상단 공지사항 배너.
- *
- * 변경사항:
- *  - useAnnouncements 훅으로 데이터 fetch 분리
- *  - handleNext/handlePrev를 useCallback으로 메모이제이션 (stale closure 수정)
- *  - useEffect 의존성 배열에 handleNext 추가 (ESLint exhaustive-deps 준수)
- */
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './AnnouncementBar.module.css';
 import { useAnnouncements } from '@/hooks/useAnnouncements';
@@ -39,7 +29,7 @@ const AnnouncementBar = () => {
     }
   }, [currentAnnouncementIndex, announcements]);
 
-  // 자동 넘김 (stale closure 수정: handleNext를 의존성 배열에 포함)
+  // 현재 공지를 기준으로 타이머를 다시 만들어 오래된 인덱스를 사용하지 않도록 합니다.
   useEffect(() => {
     if (announcements.length <= 1) return;
     const timer = setTimeout(handleNext, 5000);

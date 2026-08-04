@@ -14,10 +14,10 @@ async def run_script(script_path: str, script_name: str):
     python_executable = sys.executable
     
     if not os.path.exists(script_path):
-        logger.error(f"❌ {script_name} 파일을 찾을 수 없음: {script_path}")
+        logger.error(f"{script_name} 파일을 찾을 수 없음: {script_path}")
         return False
 
-    logger.info(f"▶️ {script_name} 시작...")
+    logger.info(f"{script_name} 시작...")
     
     # 서브프로세스 생성 (stdout을 PIPE로 설정)
     process = await asyncio.create_subprocess_exec(
@@ -47,10 +47,10 @@ async def run_script(script_path: str, script_name: str):
     return_code = await process.wait()
 
     if return_code != 0:
-        logger.error(f"❌ {script_name} 실패 (Return Code: {return_code})")
+        logger.error(f"{script_name} 실패 (Return Code: {return_code})")
         return False
     
-    logger.info(f"✅ {script_name} 정상 종료")
+    logger.info(f"{script_name} 정상 종료")
     return True
 
 async def run_scripts_in_background_async():
@@ -62,16 +62,14 @@ async def run_scripts_in_background_async():
 
         logger.info(f">> 백그라운드 작업 파이프라인 시작 (Base: {base_dir})")
 
-        # 1. 데이터 수집
         success = await run_script(collector_path, "Data Collector")
         if not success:
-            logger.error("⛔ 수집기 실패로 인해 통계 처리를 중단합니다.")
+            logger.error("수집기 실패로 인해 통계 처리를 중단합니다.")
             return
 
-        # 2. 통계 처리 (수집이 성공했을 때만 실행)
         await run_script(processor_path, "Stat Processor")
 
-        logger.info("🎉 모든 백그라운드 작업 완료.")
+        logger.info("모든 백그라운드 작업 완료.")
 
     except Exception as e:
         logger.error(f"비동기 작업 중 치명적 오류: {e}", exc_info=True)

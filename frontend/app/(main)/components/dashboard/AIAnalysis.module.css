@@ -7,10 +7,9 @@
 
 .titleContainer {
   display: flex;
-  align-items: center; /* 아이콘과 텍스트를 세로 중앙 정렬 */
+  align-items: center;
   gap: 10px;
   margin-bottom: 15px;
-  /* ✨ border-bottom과 padding-bottom을 제거하여 선을 없앱니다. */
 }
 
 .titleIcon {
@@ -50,19 +49,18 @@
 
 .iconContainer {
   position: relative;
-  display: flex; /* Image 태그를 자식으로 가질 때 레이아웃 유지를 위해 추가 */
+  display: flex;
 }
 
-/* 2. 툴팁 스타일 (평소에는 숨겨져 있음) */
 .tooltip {
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
 
   position: absolute;
-  top: 115%; /* 아이콘 바로 아래에 표시되도록 설정 */
+  top: 115%;
   left: 50%;
-  transform: translateX(-50%); /* 중앙 정렬 */
+  transform: translateX(-50%);
   
   max-width: 80vw;
   text-align: center;
@@ -72,11 +70,10 @@
   padding: 5px 10px;
   border-radius: 4px;
   font-size: 0.9em;
-  white-space: normal; /* 툴팁 내용이 한 줄로 표시되도록 */
+  white-space: normal;
   z-index: 10;
 }
 
-/* 3. 아이콘 컨테이너에 마우스를 올리면(hover) 툴팁이 보이도록 함 */
 .iconContainer:hover .tooltip {
   visibility: visible;
   opacity: 1;

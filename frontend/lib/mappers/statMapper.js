@@ -1,31 +1,8 @@
-/**
- * lib/mappers/statMapper.js
- * 도메인 계층 — 백엔드 API 응답을 StatTable이 소비하는 ViewModel 포맷으로 변환합니다.
- *
- * 이 파일을 두면:
- *  - 백엔드 필드명 변경 시 이 파일만 수정하면 됩니다.
- *  - RankPage / NormalPage의 중복 매핑 로직이 하나로 통합됩니다.
- */
-
-// ─────────────────────────────────────────────
-// 유틸리티
-// ─────────────────────────────────────────────
-
-/**
- * ViewModel 섹션 배열을 label → value Map으로 변환합니다. (빠른 조회용)
- * @param {Array<{label: string, value: any}>} items
- * @returns {Map<string, any>}
- */
+// 백엔드 필드와 화면 모델 사이의 변환을 한 곳에서 관리합니다.
 function toMap(items) {
   return new Map((items ?? []).map((item) => [item.label, item.value]));
 }
 
-/**
- * ViewModel 전체를 섹션별 Map으로 변환합니다.
- * (비교 테이블에서 내 평균과 비교값을 매핑할 때 사용)
- * @param {{ core: any[], combat: any[], operation: any[], vision: any[] }} viewModel
- * @returns {{ core: Map, combat: Map, operation: Map, vision: Map }}
- */
 export function buildBaseStatsMap(viewModel) {
   return {
     core: toMap(viewModel.core),
@@ -35,26 +12,10 @@ export function buildBaseStatsMap(viewModel) {
   };
 }
 
-/**
- * baseStatsMap의 특정 섹션으로 baseValue를 주입하는 매퍼 팩토리입니다.
- * @param {Map} sectionMap
- * @returns {(item: object) => object}
- */
 function withBase(sectionMap) {
   return (item) => ({ ...item, baseValue: sectionMap.get(item.label) });
 }
 
-// ─────────────────────────────────────────────
-// 내 평균 지표 매퍼 (랭크 / 일반 공통)
-// ─────────────────────────────────────────────
-
-/**
- * 랭크 또는 일반 통계(stat)를 StatTable ViewModel로 변환합니다.
- * 두 모드의 필드 구조가 동일하므로 하나의 함수로 통합됩니다.
- *
- * @param {object} stat  — rank_stat 또는 normal_stat
- * @returns {{ core: any[], combat: any[], operation: any[], vision: any[] }}
- */
 export function mapStatToViewModel(stat) {
   return {
     core: [
@@ -92,23 +53,6 @@ export function mapStatToViewModel(stat) {
   };
 }
 
-// ─────────────────────────────────────────────
-// 비교 지표 매퍼 (다이아+ 캐릭터 / 티어 평균 공통)
-// ─────────────────────────────────────────────
-
-/**
- * 다이아+ 캐릭터 통계 또는 티어 평균 통계를 비교 ViewModel로 변환합니다.
- * baseStatsMap을 주입하면 각 항목에 baseValue가 추가되어 StatTable에서 차이값을 표시합니다.
- *
- * 백엔드 필드 차이 (내 평균 vs 비교 지표):
- *  - 시야 점수: avg_vision_score → average_vision_score
- *  - 게임 시간: average_game_time_minutes → average_game_duration_minutes
- *  - 받은 피해: avg_damage_from_players → average_damage_taken
- *
- * @param {object} charStat   — rank_most_char_dia_stats / normal_most_char_dia_stats / tier_stats
- * @param {object} baseStatsMap — buildBaseStatsMap(myStatViewModel) 결과
- * @returns {{ core: any[], combat: any[], operation: any[], vision: any[] }}
- */
 export function mapComparisonStatToViewModel(charStat, baseStatsMap) {
   return {
     core: [

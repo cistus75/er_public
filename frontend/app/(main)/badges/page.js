@@ -1,4 +1,3 @@
-// frontend/app/badges/page.js
 
 import styles from "./page.module.css";
 import clsx from 'clsx';
@@ -78,7 +77,6 @@ const badgeData = [
 ];
 
 export default function BadgesPage() {
-    // 뱃지 데이터를 'group' 기준으로 그룹화합니다.
     const groupedBadges = badgeData.reduce((acc, badge) => {
         (acc[badge.group] = acc[badge.group] || []).push(badge);
         return acc;

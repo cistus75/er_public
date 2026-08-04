@@ -1,28 +1,6 @@
 'use client';
 
-/**
- * StatPage.js
- * 프레젠테이션 계층 — 랭크 / 앙평 / 일반 탭의 통합 UI 컴포넌트.
- *
- * 기존 RankPage.js + NormalPage.js를 하나로 병합합니다.
- * 두 컴포넌트의 차이는 설정값(문자열, tierStat 유무)뿐이므로,
- * DashboardContent에서 props로 주입하는 방식으로 통합했습니다.
- *
- * Props:
- *  stat              — 주 통계 객체 (rankStat | normalStat)
- *  comparisonStat    — 다이아+ 캐릭터 통계 (선택)
- *  tierStat          — 티어 평균 통계. undefined이면 티어 테이블을 렌더링하지 않습니다.
- *                      null이면 "데이터 부족" 메시지를 표시합니다. (랭크 전용)
- *  ai                — AI 분석 텍스트
- *  loading           — 로딩 상태
- *  noRecordMessage   — no_record일 때 표시할 메시지
- *  mainTooltip       — 내 평균 지표 테이블의 툴팁
- *  comparisonTooltip — 다이아+ 캐릭터 테이블의 툴팁
- *  noComparisonMessage — 비교 데이터 부족 시 메시지
- *  noMostPlayedMessage — 모스트 캐릭터 없을 때 안내 메시지
- *  aiTitle           — AI 분석 박스 제목
- *  aiVer             — AI 아이콘 버전 ('adina' | 'bianca')
- */
+// 랭크와 일반 탭은 같은 레이아웃을 공유하고, 차이점은 props로 주입합니다.
 
 import { useState, useCallback } from 'react';
 import styles from './pageComp.module.css';
@@ -40,7 +18,7 @@ import {
 export default function StatPage({
   stat,
   comparisonStat,
-  tierStat,             // undefined → 섹션 비표시 | null → 부족 메시지 | object → 데이터 표시
+  tierStat,
   ai,
   loading,
   noRecordMessage,
@@ -51,7 +29,6 @@ export default function StatPage({
   aiTitle,
   aiVer = 'adina',
 }) {
-  // ✅ Hook은 조건부 return 이전 최상단에 위치합니다.
   const [isDetailedVisible, setIsDetailedVisible] = useState(false);
   const toggleDetailedVisibility = useCallback(() => {
     setIsDetailedVisible((prev) => !prev);
@@ -65,7 +42,6 @@ export default function StatPage({
     return <div className={styles.noRecord}>{noRecordMessage}</div>;
   }
 
-  // ── 도메인 계층 위임 ──
   const myData = mapStatToViewModel(stat);
   const baseStatsMap = buildBaseStatsMap(myData);
 
@@ -85,7 +61,6 @@ export default function StatPage({
   return (
     <>
       <div className={styles['table-section']}>
-        {/* 내 평균 지표 */}
         <StatTable
           title="내 평균 지표"
           data={myData}
@@ -95,7 +70,6 @@ export default function StatPage({
           btnVisible={true}
         />
 
-        {/* 다이아+ 캐릭터 평균 지표 */}
         {comparisonData ? (
           <StatTable
             title={`다이아+ ${mostCharInfo.name} 평균 지표`}
@@ -114,7 +88,6 @@ export default function StatPage({
           />
         )}
 
-        {/* 티어 평균 지표 — 랭크 모드에서만 (tierStat prop이 존재할 때) */}
         {hasTierSection && (
           tierData ? (
             <StatTable

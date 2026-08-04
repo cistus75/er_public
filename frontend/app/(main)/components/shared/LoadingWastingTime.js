@@ -16,9 +16,6 @@ export default function LoadingWastingTime({message}) {
             .then(data => {
                 const randomIndex = Math.floor(Math.random() * data.message.length);
                 const randomItem = data.message[randomIndex];
-                // console.log(`데이터 길이 : ${data.length}`);
-                // console.log(`인덱스 : ${randomIndex}`);
-                // console.log(randomItem);
                 setTmi(randomItem);
             })
             .catch(error => console.error('Error fetching tmi:', error));

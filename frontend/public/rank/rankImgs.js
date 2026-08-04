@@ -1,5 +1,3 @@
-// ✨ Next.js의 정적 파일 규칙에 맞춰 public 폴더를 기준으로 경로를 설정합니다.
-
 export const rankImgs = {
   "unrank": "/rank/00.png",
   "iron": "/rank/01.png",

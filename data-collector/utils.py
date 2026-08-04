@@ -2,8 +2,7 @@ import os
 import httpx
 import re
 
-# ✨ 1. 캐릭터 맵을 파일 상단에 딕셔너리로 직접 정의
-# (코드는 str 형태로 저장하여 JSON 및 MongoDB 호환성을 높임)
+# API 응답이 없을 때도 수집 데이터를 처리할 수 있도록 기본 맵을 둡니다.
 CHARACTER_MAP = {
     "1": "재키",
     "2": "아야",
@@ -105,14 +104,12 @@ def get_latest_character_map(api_key, db_collection):
         
     try:
         headers = {"x-api-key": api_key, "accept": "application/json"}
-        # 1. 메타 데이터 조회
         char_res = httpx.get("https://open-api.bser.io/v1/data/Character", headers=headers, timeout=10.0)
         char_res.raise_for_status()
         char_data = char_res.json()
         if char_data.get('code') != 200:
             return base_map
             
-        # 2. 한국어 경로 조회
         l10n_res = httpx.get("https://open-api.bser.io/v1/l10n/Korean", headers=headers, timeout=10.0)
         l10n_res.raise_for_status()
         l10n_path = l10n_res.json().get('data', {}).get('l10Path')
@@ -120,7 +117,6 @@ def get_latest_character_map(api_key, db_collection):
         if not l10n_path:
             return base_map
             
-        # 3. 실제 텍스트 로드 및 정규식 치환
         txt_res = httpx.get(l10n_path, timeout=10.0)
         txt_res.raise_for_status()
         
@@ -138,7 +134,7 @@ def get_latest_character_map(api_key, db_collection):
         return base_map
         
     except Exception as e:
-        print(f"⚠️ 최신 캐릭터 맵 동기화 실패 (Fallback 사용): {e}")
+        print(f"최신 캐릭터 맵 동기화 실패 (Fallback 사용): {e}")
         return base_map
 
 def get_tier(mmr, rank=None):

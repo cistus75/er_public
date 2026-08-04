@@ -9,7 +9,6 @@ settings = get_settings()
 
 class Database:
     client: AsyncIOMotorClient = None
-    # ✨ 1. 실제 데이터베이스 객체를 저장할 변수 추가
     db_instance: AsyncIOMotorDatabase = None
 
 db = Database()
@@ -18,8 +17,6 @@ async def connect_to_mongo():
     logger.info("MongoDB에 연결 중...")
     db.client = AsyncIOMotorClient(settings.MONGO_URI)
     
-    # ✨ 2. MONGO_DB_NAME 설정값을 사용하여 특정 데이터베이스에 연결
-    #    이렇게 하면 코드 다른 부분에서 DB 이름을 신경 쓸 필요가 없습니다.
     db.db_instance = db.client[settings.MONGO_DB_NAME]
     
     try:
@@ -38,7 +35,5 @@ async def close_mongo_connection():
         db.client.close()
 
 async def get_database() -> AsyncIOMotorDatabase:
-    # ✨ 3. 가장 큰 변경점:
-    #    lifespan에서 이미 연결을 보장하므로, 복잡한 확인 로직 없이
-    #    생성된 데이터베이스 인스턴스를 바로 반환합니다.
+    # lifespan에서 연결을 확인하므로 요청마다 새 연결을 만들지 않습니다.
     return db.db_instance

@@ -1,7 +1,6 @@
 import os
 
-# ✨ 1. 캐릭터 맵을 파일 상단에 딕셔너리로 직접 정의
-# (코드는 str 형태로 저장하여 JSON 및 MongoDB 호환성을 높임)
+# API에서 캐릭터 맵을 가져오지 못할 때 사용할 기본 맵입니다.
 CHARACTER_MAP = {
     "1": "재키",
     "2": "아야",
@@ -111,7 +110,6 @@ def load_character_map():
     """
     미리 정의된 CHARACTER_MAP 딕셔너리를 반환합니다.
     """
-    # ✨ 2. 이제 함수는 파일을 읽는 대신, 이 딕셔너리를 즉시 반환합니다.
     return CHARACTER_MAP
 
 def get_tier(mmr, rank=None):
@@ -134,9 +132,7 @@ def get_tier(mmr, rank=None):
     else : return 'unrank'
 
 
-# ==============================================================================
 # 캐릭터 역할 매핑
-# ==============================================================================
 
 CHARACTER_ROLE_MAP: dict[int, str] = {
     # 탱커
@@ -178,9 +174,7 @@ def get_character_role(character_code: int | None) -> str:
     return CHARACTER_ROLE_MAP.get(int(character_code), "알 수 없음")
 
 
-# ==============================================================================
 # 등급 계산 헬퍼
-# ==============================================================================
 
 def _g_high(v: float, s: float, a: float, b: float, c: float) -> str:
     """값이 클수록 좋은 지표의 등급을 반환합니다."""
@@ -212,9 +206,7 @@ def _best_worst(grades: dict[str, str]) -> tuple[dict, dict]:
     )
 
 
-# ==============================================================================
 # 랭크/일반 모드 등급 계산
-# ==============================================================================
 
 def calculate_stat_grades(stat: dict, character_role: str) -> dict:
     """
@@ -256,9 +248,7 @@ def calculate_stat_grades(stat: dict, character_role: str) -> dict:
     return {"grades": g, "best": best, "worst": worst}
 
 
-# ==============================================================================
 # 코발트 모드 등급 계산
-# ==============================================================================
 
 def calculate_cobalt_stat_grades(stat: dict, character_role: str) -> dict:
     """

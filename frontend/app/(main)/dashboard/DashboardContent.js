@@ -11,8 +11,7 @@ import StatPage from './StatPage';
 import CobaltPage from './CobaltPage';
 import LoadingWastingTime from '../components/shared/LoadingWastingTime';
 
-// ── 탭별 설정 상수 ─────────────────────────────────────────
-// 문자열 리터럴을 렌더링 로직에서 분리합니다.
+// 탭별 문구와 표시 옵션을 렌더링 로직과 분리합니다.
 const TAB_CONFIG = {
   rank: {
     mainTooltip: '최근 랭크 게임 20판의 데이터로 평균 지표를 나타냅니다.',
@@ -59,8 +58,6 @@ const TABS = [
   { key: 'angpyeong', label: '앙평' },
   { key: 'cobalt',    label: '코발트' },
 ];
-// ────────────────────────────────────────────────────────────
-
 export default function DashboardContent() {
   const searchParams = useSearchParams();
   const nickname = searchParams.get('nickname');
@@ -109,7 +106,7 @@ export default function DashboardContent() {
           <StatPage
             stat={rankStat}
             comparisonStat={diaRankCharStats}
-            tierStat={tierStats}        // undefined가 아닌 값 → 티어 섹션 표시
+            tierStat={tierStats}
             ai={gameType === 'angpyeong' ? angpyeongAiAnalysis : rankAiAnalysis}
             loading={loading}
             {...config}
@@ -120,7 +117,6 @@ export default function DashboardContent() {
           <StatPage
             stat={normalStat}
             comparisonStat={diaNormalCharStats}
-                                        // tierStat 미전달 → undefined → 티어 섹션 숨김
             ai={normalAiAnalysis}
             loading={loading}
             {...config}
@@ -141,7 +137,6 @@ export default function DashboardContent() {
 
   return (
     <div className={styles['contents']}>
-      {/* ── 유저 정보 영역 ── */}
       <div className={styles['user-info']}>
         <div className={styles['rank-area']}>
           {tier && <Image src={rankImgs[tier]} alt="User Tier" width={80} height={80} />}
@@ -188,7 +183,6 @@ export default function DashboardContent() {
         </div>
       </div>
 
-      {/* ── 탭 전환 영역 ── */}
       <div className={styles['middle-container']}>
         <div className={styles['toggle']}>
           {TABS.map(({ key, label }) => (
@@ -204,7 +198,6 @@ export default function DashboardContent() {
         <div className={styles['guide']}>{GUIDE_TEXT[gameType]}</div>
       </div>
 
-      {/* ── 탭 콘텐츠 ── */}
       <div className={styles['detail']}>{renderStatContent()}</div>
     </div>
   );

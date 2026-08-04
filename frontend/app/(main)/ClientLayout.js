@@ -1,15 +1,5 @@
 'use client';
 
-/**
- * ClientLayout.js
- * 프레젠테이션 계층 — 전체 레이아웃(헤더/푸터/사이드바)을 담당하는 클라이언트 컴포넌트.
- *
- * 변경사항:
- *  - useTheme 훅 적용 (테마 상태/로직 분리)
- *  - 모달 Tailwind CDN 클래스 → ClientLayout.module.css로 교체
- *  - 디버그 주석 제거
- */
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -116,7 +106,6 @@ export default function ClientLayout({ children }) {
         </footer>
       </div>
 
-      {/* 닉네임 미입력 시 에러 모달 — CSS 모듈로 스타일링 (Tailwind CDN 의존성 제거) */}
       {showModal && (
         <div className={modalStyles.modalOverlay}>
           <div className={modalStyles.modalBox}>

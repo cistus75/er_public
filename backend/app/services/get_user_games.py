@@ -149,9 +149,7 @@ class GameStatsAnalyzer:
                 self.userId,
             )
 
-    # ------------------------------------------------------------------
-    # Private 통계 계산 메서드
-    # ------------------------------------------------------------------
+    # 내부 통계 계산 메서드
 
     def _calculate_kda(self, matches: list) -> dict:
         if not matches:
@@ -354,9 +352,7 @@ class GameStatsAnalyzer:
             return 0.0
         return round(mean(m.get("useEmpDrone", 0) for m in matches), 1)
 
-    # ------------------------------------------------------------------
-    # Public 통계 조회 메서드
-    # ------------------------------------------------------------------
+    # 외부에서 사용하는 통계 조회 메서드
 
     def get_detailed_stats(self, mode: str = "ranked") -> dict:
         """

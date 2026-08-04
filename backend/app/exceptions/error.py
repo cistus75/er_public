@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
-# --- 커스텀 예외 클래스 ---
 class UserNotFoundException(Exception):
     def __init__(self, nickname: str):
         self.nickname = nickname
@@ -14,7 +13,6 @@ class UserNotFoundException(Exception):
 class NoRecentGamesException(Exception):
     pass
 
-# --- 예외 핸들러 ---
 async def user_not_found_exception_handler(request: Request, exc: UserNotFoundException):
     return JSONResponse(
         status_code=404,

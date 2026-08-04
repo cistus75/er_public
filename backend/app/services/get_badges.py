@@ -1,17 +1,5 @@
-#브론즈 뱃지, 실버 뱃지, 골드 뱃지, 백야 뱃지 4종류 존재.
-#브론즈(1티어) 각 1점, 실버(2티어) 각 3점, 골드(3티어) 각 5점, 백야(4티어) 각 10점.
-#점수에 따라 등급 뱃지 추가 부여.
 
 
-#아래의 코드는 순서대로 하단의 역할을 가짐.
-
-#뱃지 이름
-#뱃지 조건 설명
-#뱃지 분류
-#뱃지 티어
-#뱃지 우선도
-#뱃지 이미지 url
-#뱃지 달성 조건
 
 
 
@@ -19,8 +7,6 @@
 
 badge_rules = [
 
-
-# 레벨 뱃지
 
     {
         "name" : "신입 연구원",  
@@ -692,13 +678,11 @@ def get_badges(stat, rank):
     rank.setdefault("rank", 999999)
         
     earned_badges = []
-    # 1. 조건에 맞는 모든 뱃지를 리스트에 추가
     for rule in badge_rules:
         if stat and rank and rule["condition"](stat, rank):
             earned_badges.append(rule)
 
     earned_by_group = {}
-    # 2. 같은 그룹 내에서는 step이 가장 높은 뱃지만 남기기
     for badge in earned_badges:
         group = badge.get("group", "default")
         existing = earned_by_group.get(group)
@@ -706,10 +690,8 @@ def get_badges(stat, rank):
         if not existing or badge["step"] > existing["step"]:
             earned_by_group[group] = badge
             
-    # 3. 그룹별로 필터링된 뱃지들을 리스트로 변환
     final_badges = list(earned_by_group.values())
     
-    # 4. tier와 step 모두 내림차순(높은게 먼저)으로 정렬
     final_badges.sort(key=lambda x: (-x['tier'], -x['step']))
     
     return final_badges

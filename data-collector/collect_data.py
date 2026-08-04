@@ -18,9 +18,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("DataCollector")
 
-# ==========================================
-# [설정]
-# ==========================================
+# 수집 설정
 BASE_URL = "https://open-api.bser.io"
 API_KEY = os.getenv("OPEN_API_KEY")
 MONGO_URI = os.getenv("MONGO_URI")
@@ -40,10 +38,8 @@ DAYS_LIMIT = 7
 
 # ER API Limit: 1초당 50회 제한 (안전하게 45회로 제한)
 rate_limiter = AsyncLimiter(45, 1)
-# ==========================================
-
 REQUIRED_FIELDS = [
-    # 1. 식별 및 게임 환경
+    # 식별자와 게임 환경
     'gameId',             
     'nickname',           
     'seasonId',           
@@ -54,13 +50,13 @@ REQUIRED_FIELDS = [
     'versionSeason',      
     'versionMajor',       
 
-    # 2. 성적 및 캐릭터
+    # 성적과 캐릭터
     'characterNum',       
     'mmrBefore',          
     'gameRank',           
     'playTime',           
 
-    # 3. 전투 지표
+    # 전투 지표
     'playerKill',         
     'playerAssistant',    
     'playerDeaths',       
@@ -69,7 +65,7 @@ REQUIRED_FIELDS = [
     'damageToPlayer',     
     'damageFromPlayer',   
 
-    # 4. 시야 지표
+    # 시야 지표
     'viewContribution',       
     'useSecurityConsole',     
     'addTelephotoCamera',     
@@ -77,7 +73,7 @@ REQUIRED_FIELDS = [
     'useReconDrone',          
     'useEmpDrone',            
 
-    # 5. 운영 및 특수 지표
+    # 운영 및 특수 지표
     'totalGainVFCredit',  
     'teamRecover',        
     'clutchCount',        
@@ -118,7 +114,7 @@ async def get_ranker_latest_game_id(client: httpx.AsyncClient, ranker: dict):
     return None
 
 async def get_start_id(client: httpx.AsyncClient):
-    logger.info(f"⚓ [{TARGET_SERVER_NAME}] Top 30 랭커의 최신 게임을 전수 조사합니다...")
+    logger.info(f"[{TARGET_SERVER_NAME}] Top 30 랭커의 최신 게임을 전수 조사합니다...")
     try:
         rank_res = await fetch_with_retry(client, f"/v1/rank/top/{TARGET_SEASON_ID}/{TARGET_TEAM_MODE}/10")
         target_rankers = rank_res.json().get("topRanks", [])[:30] 
@@ -132,7 +128,7 @@ async def get_start_id(client: httpx.AsyncClient):
             return None
             
         max_id = max(valid_ids)
-        logger.info(f"✅ 최신 시작점 확보 완료: {max_id}")
+        logger.info(f"최신 시작점 확보 완료: {max_id}")
         return max_id
     except Exception as e:
         logger.error(f"시작점 탐색 중 에러 발생: {e}", exc_info=True)
@@ -165,7 +161,7 @@ async def main():
     
     # 7일 제한 날짜 계산 및 시간대 강제 부여(UTC)
     cutoff_date = datetime.now(timezone.utc) - timedelta(days=DAYS_LIMIT)
-    logger.info(f"📅 데이터 수집 제한일: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S')} UTC (이전 데이터는 수집 중단)")
+    logger.info(f"데이터 수집 제한일: {cutoff_date.strftime('%Y-%m-%d %H:%M:%S')} UTC (이전 데이터는 수집 중단)")
     
     headers = {"x-api-key": API_KEY, "accept": "application/json"}
     
@@ -173,15 +169,14 @@ async def main():
         current_id = await get_start_id(client)
         if not current_id: return
         
-        logger.info(f"\n🚀 스캔 시작! {current_id}번부터 역순으로 {SCAN_LIMIT}개 탐색")
-        logger.info(f"📦 청크 단위({CHUNK_SIZE}개)로 DB에 순차 저장합니다 (Bulk Write).")
-        logger.info("=" * 60)
+        logger.info(f"\n스캔 시작: {current_id}번부터 역순으로 {SCAN_LIMIT}개 탐색")
+        logger.info(f"청크 단위({CHUNK_SIZE}개)로 DB에 순차 저장합니다 (Bulk Write).")
 
         stop_collecting = False
 
         for start_offset in range(0, SCAN_LIMIT, CHUNK_SIZE):
             if stop_collecting:
-                logger.info("🛑 7일 이전 데이터 도달! 전체 수집을 안전하게 종료합니다.")
+                logger.info("7일 이전 데이터에 도달하여 수집을 종료합니다.")
                 break
 
             chunk_ids = range(current_id - start_offset, current_id - start_offset - CHUNK_SIZE, -1)
@@ -246,14 +241,14 @@ async def main():
             if bulk_ops:
                 try:
                     result = collection.bulk_write(bulk_ops, ordered=False)
-                    logger.info(f"📦 ID {chunk_ids[0]}~{chunk_ids[-1]} 구간: {result.upserted_count + result.modified_count}건 반영 완료 (Bulk)")
+                    logger.info(f"ID {chunk_ids[0]}~{chunk_ids[-1]} 구간: {result.upserted_count + result.modified_count}건 반영 완료 (Bulk)")
                 except Exception as e:
                     logger.error(f"MongoDB Bulk Write 에러 발생: {e}")
             else:
-                logger.info(f"📦 ID {chunk_ids[0]}~{chunk_ids[-1]} 구간: 조건 맞는 데이터 없음.")
+                    logger.info(f"ID {chunk_ids[0]}~{chunk_ids[-1]} 구간: 조건에 맞는 데이터 없음.")
 
     mongo_client.close()
-    logger.info("🏁 모든 데이터 수집 및 안전하게 저장 완료.")
+    logger.info("모든 데이터 수집 및 저장 완료.")
     sys.exit(0)
 
 if __name__ == "__main__":

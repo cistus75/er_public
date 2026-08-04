@@ -5,7 +5,7 @@
   margin: 10px auto 0px; 
   height: 40px;
   border-radius: 10px;
-  background-color: var(--header-bg); /* 이미지와 유사한 어두운 배경 */
+  background-color: var(--header-bg);
   color: var(--announcement-text);
   font-size: 14px;
   overflow: hidden;
@@ -13,7 +13,6 @@
   gap: 10px;
 }
 
-/* 텍스트가 표시되는 중앙 영역 */
 .textContainer {
   flex: 1;
   overflow: hidden;
@@ -28,7 +27,6 @@
   cursor: pointer;
 }
 
-/* 컨트롤러 영역 */
 .controls {
   display: flex;
   align-items: center;
@@ -62,7 +60,6 @@
   color: var(--announcement-text);
 }
 
-/* 필요 시 기존 마루이(Marquee) 애니메이션 CSS 유지 */
 .scrollingText {
   position: absolute;
   animation: marquee 10s linear infinite;

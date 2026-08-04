@@ -50,14 +50,12 @@
   gap: 10px;
 }
 
-/* 3-column Grid for desktops, 1-column for mobile */
 .badgeGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
 }
 
-/* Base Badge Card */
 .badgeCard {
   display: flex;
   flex-direction: column;
@@ -97,29 +95,27 @@
   line-height: 1.5;
 }
 
-/* Tier Specific Colors */
 .tier1 {
-  background-color: #fffaf0; /* Light Orange/Bronze */
+  background-color: #fffaf0;
   border-color: #fbd38d;
 }
 .tier1 .badgeName { color: #7b341e; }
 .tier1 .badgeTier { background-color: #feebc8; color: #7b341e; }
 
 .tier2 {
-  background-color: #f7fafc; /* Silver */
+  background-color: #f7fafc;
   border-color: #cbd5e0;
 }
 .tier2 .badgeName { color: #2d3748; }
 .tier2 .badgeTier { background-color: #edf2f7; color: #2d3748; }
 
 .tier3 {
-  background-color: #fffdf2; /* Gold */
+  background-color: #fffdf2;
   border-color: #f6e05e;
 }
 .tier3 .badgeName { color: #744210; }
 .tier3 .badgeTier { background-color: #fefcbf; color: #744210; }
 
-/* Tier 4 (Diamond/Master) special styling */
 .tier4 {
   background-color: white;
   border-color: #90cdf4;
@@ -140,7 +136,6 @@
 }
 .tier4 .badgeTier { background-color: #ebf8ff; color: #2b6cb0; }
 
-/* Dark mode overrides */
 :global(html.dark) .badgeCard {
   background-color: #2d3748;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4);

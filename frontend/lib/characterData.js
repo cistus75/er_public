@@ -1,5 +1,3 @@
-// 캐릭터 코드, 이름, 이미지 경로를 매핑하는 데이터 파일입니다.
-// 이미지 경로는 public 폴더를 기준으로 합니다. 커위커
 export const characterInfo = {
   1: { name: '재키', image: '/images/characters/default_mini_Jackie.png' },
   2: { name: '아야', image: '/images/characters/default_mini_Aya.png' },
@@ -91,7 +89,6 @@ export const characterInfo = {
   default: { name: '알 수 없음', image: '/char_placeholder.png' }
 };
 
-// 캐릭터 코드를 받으면 해당 캐릭터의 정보를 반환하는 헬퍼 함수
 export const getCharacterInfo = (code) => {
   return characterInfo[code] || characterInfo.default;
 };

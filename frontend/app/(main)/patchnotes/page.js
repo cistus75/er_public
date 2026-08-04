@@ -3,7 +3,7 @@ import styles from './page.module.css';
 
 import { getAllPatchNotes } from '@/lib/patchNotes';
 export default function PatchNotesPage() {
-  const allNotes = getAllPatchNotes(); // 서버 컴포넌트라 바로 호출 가능
+  const allNotes = getAllPatchNotes();
 
   return (
     <div className={styles.patchnoteContainer}>

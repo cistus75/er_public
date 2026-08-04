@@ -1,13 +1,7 @@
 import { getPatchNoteData } from '@/lib/patchNotes';
-// 1. ReactMarkdown과 remarkGfm 임포트 제거
-// import ReactMarkdown from 'react-markdown';
-// import remarkGfm from 'remark-gfm';
-
-// 2. 새로 만든 클라이언트 컴포넌트를 임포트합니다.
 import MarkdownRenderer from '../../components/patchnotes/MarkdownRenderer';
 import styles from '../page.module.css';
 
-// ... generateMetadata 함수 (변경 없음) ...
 export async function generateMetadata({ params }) {
   const noteData = getPatchNoteData(params.version);
   return {
@@ -26,7 +20,6 @@ export default function PatchNoteDetailPage({ params }) {
       </header>
       
       <div className={styles.patchArea}>
-        {/* 3. ReactMarkdown 대신 MarkdownRenderer를 사용합니다. */}
         <MarkdownRenderer content={noteData.content} />
       </div>
     </article>

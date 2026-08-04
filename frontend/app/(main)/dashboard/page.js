@@ -1,4 +1,3 @@
-// app/dashboard/page.js
 import { Suspense } from 'react';
 import DashboardContent from './DashboardContent';
 

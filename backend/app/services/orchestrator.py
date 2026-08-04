@@ -17,7 +17,6 @@ async def get_comparison_stats(
     """DB에서 비교 통계 데이터를 비동기 병렬로 조회합니다."""
     tasks = []
     
-    # 티어 통계 쿼리
     if tier != 'unrank':
         # 데이터 수집기가 돌아 데미갓 통계가 DB에 쌓이기 전까지는 mithril을 빌려다 씁니다. (유저 요청: 미스릴+ 통합)
         query_tier = tier if tier not in ['demigod', 'titan', 'immortal'] else 'mithril'
@@ -25,22 +24,18 @@ async def get_comparison_stats(
     else:
         tasks.append(asyncio.sleep(0, result=None))
 
-    # 랭크 모스트 캐릭터 통계 쿼리
     if not rank_stat.get('no_record') and (code := rank_stat.get('most_used_character_code')):
         tasks.append(db.high_mmr_char_stats.find_one({'character_code': code}, {'_id': 0}))
     else:
         tasks.append(asyncio.sleep(0, result=None))
 
-    # 일반 모스트 캐릭터 통계 쿼리
     if not normal_stat.get('no_record') and (code := normal_stat.get('most_used_character_code')):
         tasks.append(db.high_mmr_char_stats.find_one({'character_code': code}, {'_id': 0}))
     else:
         tasks.append(asyncio.sleep(0, result=None))
 
-    # 모든 DB 쿼리를 동시에 실행
     results = await asyncio.gather(*tasks)
     
-    # ✅ 수정된 부분: results 리스트의 각 항목을 순서대로 반환합니다.
     return results[0], results[1], results[2]
 
 
@@ -56,7 +51,6 @@ async def get_user_profile_data(
     import time
     total_start = time.perf_counter()
 
-    # 1. ER API에서 랭크 정보와 게임 통계를 병렬로 수집합니다.
     er_start = time.perf_counter()
     rank_result, (rank_stat, normal_stat, cobalt_stat, retry_count) = await asyncio.gather(
         er.get_user_rank_async(er_client, userId),
@@ -73,14 +67,12 @@ async def get_user_profile_data(
     tier = get_tier(mmr, rank)
     nickname = rank_result.get('nickname') if rank_result else rank_stat.get('nickname', '알 수 없음')
 
-    # 2. DB에서 비교 통계 데이터를 비동기 병렬로 수집합니다.
     db_start = time.perf_counter()
     tier_stats_result, rank_most_char_dia_stats, normal_most_char_dia_stats = await get_comparison_stats(
         db, tier, rank_stat, normal_stat
     )
     db_duration = time.perf_counter() - db_start
 
-    # 3. AI 분석 및 뱃지 생성을 병렬로 처리할 작업을 구성합니다.
     tasks = {}
     if not rank_stat.get('no_record'):
         # get_badges는 동기 함수이므로 to_thread로 감싸 이벤트 루프 차단을 방지합니다.
@@ -109,14 +101,12 @@ async def get_user_profile_data(
             stat_data=cobalt_stat, semaphore=gemini_semaphore,
         )
 
-    # 4. 모든 병렬 작업을 실행하고 결과를 수집합니다.
     # return_exceptions=True를 통해 일부 작업이 실패해도 전체가 중단되지 않습니다.
     ai_start = time.perf_counter()
     task_results = await asyncio.gather(*tasks.values(), return_exceptions=True)
     results_dict = dict(zip(tasks.keys(), task_results))
     ai_duration = time.perf_counter() - ai_start
 
-    # 5. 실패한 작업 확인 및 AI 상태 요약 생성
     ai_status = []
     for key, label in [('rank_ai', 'R'), ('normal_ai', 'N'), ('cobalt_ai', 'C'), ('angpyeong_ai', 'A')]:
         value = results_dict.get(key)
@@ -136,14 +126,12 @@ async def get_user_profile_data(
 
     total_duration = time.perf_counter() - total_start
     
-    # 🎯 최종 요약 로그 한 줄 출력
     logger.info(
-        f"📊 [Search Summary] Nick: {nickname} ({tier.upper()}/{most_char}) | Matches: ({m_counts}) | "
+        f"[Search Summary] Nick: {nickname} ({tier.upper()}/{most_char}) | Matches: ({m_counts}) | "
         f"Total: {total_duration:.2f}s (API:{er_duration:.2f}s | AI:{ai_duration:.2f}s) | "
         f"Retry: {retry_count}회 | AI Status: [{' '.join(ai_status)}]"
     )
 
-    # 6. 모든 데이터를 취합하여 최종 응답 객체를 구성합니다.
     return {
         "rank": rank_result,
         "tier": tier,

@@ -4,10 +4,8 @@ export default function MaintenancePage() {
   return (
     <div style={styles.container}>
       <div style={styles.content}>
-        {/* 이미지 영역 */}
         <div style={styles.imageWrapper}>
           <Image 
-            // ✅ 파일명 변경: fix_adina.png (확장자가 jpg라면 .jpg로 바꿔주세요)
             src="/images/fix_adina.png"
             alt="수리 중인 아디나"
             width={180} 
@@ -16,7 +14,6 @@ export default function MaintenancePage() {
           />
         </div>
 
-        {/* 텍스트 영역 */}
         <h1 style={styles.title}>운명을 재계산 중입니다...</h1>
         
         <p style={styles.description}>
@@ -41,7 +38,6 @@ export default function MaintenancePage() {
   );
 }
 
-// 스타일 (배경색 등은 아디나와 어울리는 톤 유지)
 const styles = {
   container: {
     minHeight: "100vh",
@@ -65,7 +61,7 @@ const styles = {
     fontSize: "2rem",
     fontWeight: "800",
     marginBottom: "10px",
-    color: "#FCD34D", // 별 색깔(노랑) 포인트
+    color: "#FCD34D",
   },
   description: {
     fontSize: "1.3rem",

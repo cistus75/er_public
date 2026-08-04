@@ -11,10 +11,6 @@ class Settings(BaseSettings):
     OPEN_API_KEY: str
     ER_BASE_URL: str = "https://open-api.bser.io"
 
-    # Google Gemini API
-    # GEMINI_API_KEY: str
-    # GOOGLE_API_KEY 방식으로 변경되어 더 이상 사용하지 않음
-
     # MongoDB
     MONGO_URI: str
     MONGO_DB_NAME: str = "er-user-insight"
@@ -33,7 +29,7 @@ class Settings(BaseSettings):
         "https://adina-test.vercel.app",
     ]
 
-# @lru_cache: Settings 객체를 한 번만 생성하고 캐싱하여 성능 향상
+# 설정 객체를 프로세스 내에서 한 번만 만들도록 캐시합니다.
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
